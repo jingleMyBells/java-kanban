@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -58,10 +59,7 @@ public class TaskManager {
     }
 
     public void deleteAllEpics() {
-        /*
-        * По ТЗ непонятно, надо ли делать что-либо
-        * с подазадчами при удалении эпиков
-        */
+        this.subtasks.clear();
         this.epics.clear();
     }
 
@@ -70,11 +68,43 @@ public class TaskManager {
     }
 
     public void deleteEpicById(int id) {
-        /*
-         * По ТЗ непонятно, надо ли делать что-либо
-         * с подазадчами при удалении эпиков
-         */
         this.epics.remove(id);
+        ArrayList<Integer> idsToDelete = new ArrayList<>();
+        for (Subtask subtask : this.getAllSubtasks()) {
+            if (subtask.getEpicId() == id) {
+                idsToDelete.add(subtask.getId());
+            }
+        }
+        for (int subtaskId : idsToDelete) {
+            this.subtasks.remove(subtaskId);
+        }
+    }
+
+    public void checkAndModifyEpicStatus(Epic epic) {
+        int tasksCounter = epic.getTasks().size();
+        if (tasksCounter > 0) {
+            int newTasks = 0;
+            int doneTasks = 0;
+            for (Subtask subtask : epic.getTasks()) {
+                Status status = subtask.getStatus();
+                if (status == Status.DONE) {
+                    doneTasks++;
+                } else if (status == Status.NEW) {
+                    newTasks++;
+                }
+                if (doneTasks > 0 && newTasks > 0) {
+                    epic.setStatus(Status.IN_PROGRESS);
+                    break;
+                }
+            }
+            if (doneTasks == tasksCounter) {
+                epic.setStatus(Status.DONE);
+            } else if (newTasks == tasksCounter) {
+                epic.setStatus(Status.NEW);
+            }
+        } else {
+            epic.setStatus(Status.NEW);
+        }
     }
 
     public void saveSubtask(Subtask subtask) {
@@ -84,7 +114,7 @@ public class TaskManager {
         this.subtasks.put(subtask.getId(), subtask);
         Epic epic = this.epics.get(subtask.getEpicId());
         epic.addSubtask(subtask);
-        epic.checkAndModifyStatus();
+        this.checkAndModifyEpicStatus(epic);
     }
 
     public Collection<Subtask> getAllSubtasks() {
@@ -94,7 +124,7 @@ public class TaskManager {
     public void deleteAllSubtasks() {
         this.subtasks.clear();
         for (Epic epic : this.getAllEpics()) {
-            epic.checkAndModifyStatus();
+            this.checkAndModifyEpicStatus(epic);
         }
     }
 
@@ -106,6 +136,6 @@ public class TaskManager {
         Epic epic = this.epics.get(this.subtasks.get(id).getEpicId());
         epic.removeSubtask(this.getSubtaskById(id));
         this.subtasks.remove(id);
-        epic.checkAndModifyStatus();
+        this.checkAndModifyEpicStatus(epic);
     }
 }

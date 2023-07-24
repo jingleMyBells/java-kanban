@@ -7,10 +7,10 @@ public class Main {
     public static void methodForTesting() {
         TaskManager taskManager = new TaskManager();
 
-        Task newTask = new Task("Создать вторую задачу", "Вот тебе первая таска");
+        Task newTask = new Task("Создать вторую задачу", "Вот тебе первая таска", Status.NEW);
         taskManager.saveTask(newTask);
 
-        Task newTask2 = new Task("Закончить с тасками", "После этого перейди к эпикам");
+        Task newTask2 = new Task("Закончить с тасками", "После этого перейди к эпикам", Status.NEW);
         taskManager.saveTask(newTask2);
 
         System.out.println("Список задач: " + taskManager.getAllTasks());
