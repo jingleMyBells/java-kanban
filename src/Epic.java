@@ -27,30 +27,6 @@ public class Epic extends Task{
         this.tasks.remove(subtask);
     }
 
-    public void checkAndModifyStatus() {
-        HashMap<Status, Integer> tasksStatuses = new HashMap<>();
-        tasksStatuses.put(Status.NEW, 0);
-        tasksStatuses.put(Status.DONE, 0);
-        tasksStatuses.put(Status.IN_PROGRESS, 0);
-        for (Subtask task : tasks) {
-            int statusCounter = tasksStatuses.get(task.getStatus());
-            tasksStatuses.put(task.getStatus(), ++statusCounter);
-        }
-        int tasksCount = this.tasks.size();
-
-        if (tasksCount == 0) {
-            this.setStatus(Status.NEW);
-        } else {
-            if (tasksStatuses.get(Status.NEW) == tasksCount) {
-                this.setStatus(Status.NEW);
-            } else if (tasksStatuses.get(Status.DONE) == tasksCount) {
-                this.setStatus(Status.DONE);
-            } else {
-                this.setStatus(Status.IN_PROGRESS);
-            }
-        }
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
