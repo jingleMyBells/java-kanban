@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -58,10 +59,7 @@ public class TaskManager {
     }
 
     public void deleteAllEpics() {
-        /*
-        * По ТЗ непонятно, надо ли делать что-либо
-        * с подазадчами при удалении эпиков
-        */
+        this.subtasks.clear();
         this.epics.clear();
     }
 
@@ -70,11 +68,16 @@ public class TaskManager {
     }
 
     public void deleteEpicById(int id) {
-        /*
-         * По ТЗ непонятно, надо ли делать что-либо
-         * с подазадчами при удалении эпиков
-         */
         this.epics.remove(id);
+        ArrayList<Integer> idsToDelete = new ArrayList<>();
+        for (Subtask subtask : this.getAllSubtasks()) {
+            if (subtask.getEpicId() == id) {
+                idsToDelete.add(subtask.getId());
+            }
+        }
+        for (int subtaskId : idsToDelete) {
+            this.subtasks.remove(subtaskId);
+        }
     }
 
     public void saveSubtask(Subtask subtask) {
