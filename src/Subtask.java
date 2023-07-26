@@ -1,5 +1,3 @@
-import java.util.Objects;
-
 public class Subtask extends Task {
     private int epicId;
 
@@ -25,18 +23,13 @@ public class Subtask extends Task {
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(this.getId(), this.getTitle(), this.getDescription(), this.getStatus());
-    }
-
-    @Override
     public String toString() {
         return this.getClass() + "{" +
-                "id=" + this.getId() +
-                ", title='" + this.getTitle() + '\'' +
-                ", description='" + this.getDescription() + '\'' +
-                ", epicId='" + this.getEpicId() + '\'' +
-                ", status=" + this.getStatus() +
+                "id=" + this.id +
+                ", title='" + this.title + '\'' +
+                ", description='" + this.description + '\'' +
+                ", epicId='" + this.epicId + '\'' +
+                ", status=" + this.status +
                 '}';
     }
 }

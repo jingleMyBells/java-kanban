@@ -16,19 +16,20 @@ public class TaskManager {
         this.subtasks = new HashMap<>();
     }
 
-    private int getAutoIncrement() {
-        return this.autoIncrement;
-    }
-
     private int createNewTaskId() {
         return ++this.autoIncrement;
     }
 
-    public void saveTask(Task task) {
-        if (task.getId() == 0) {
-            task.setId(createNewTaskId());
-        }
+    public void createTask(Task task) {
+        task.setId(createNewTaskId());
         this.tasks.put(task.getId(), task);
+    }
+
+    public void updateTask(Task task) {
+        Task taskForUpdate = this.tasks.get(task.getId());
+        taskForUpdate.setTitle(task.getTitle());
+        taskForUpdate.setDescription(task.getDescription());
+        taskForUpdate.setStatus(task.getStatus());
     }
 
     public Collection<Task> getAllTasks() {
@@ -47,11 +48,16 @@ public class TaskManager {
         this.tasks.remove(id);
     }
 
-    public void saveEpic(Epic epic) {
-        if (epic.getId() == 0) {
-            epic.setId(createNewTaskId());
-        }
+    public void createEpic(Epic epic) {
+        epic.setId(createNewTaskId());
         this.epics.put(epic.getId(), epic);
+    }
+
+    public void updateEpic(Epic epic) {
+        Epic epicForUpdate = this.epics.get(epic.getId());
+        epicForUpdate.setTitle(epic.getTitle());
+        epicForUpdate.setDescription(epic.getDescription());
+        epicForUpdate.setStatus(epic.getStatus());
     }
 
     public Collection<Epic> getAllEpics() {
@@ -78,6 +84,10 @@ public class TaskManager {
         for (int subtaskId : idsToDelete) {
             this.subtasks.remove(subtaskId);
         }
+    }
+
+    public ArrayList<Subtask> getAllEpicSubtasks(Epic epic) {
+        return epic.getTasks();
     }
 
     public void checkAndModifyEpicStatus(Epic epic) {
@@ -107,13 +117,21 @@ public class TaskManager {
         }
     }
 
-    public void saveSubtask(Subtask subtask) {
-        if (subtask.getId() == 0) {
-            subtask.setId(createNewTaskId());
-        }
+    public void createSubtask(Subtask subtask) {
+        subtask.setId(createNewTaskId());
         this.subtasks.put(subtask.getId(), subtask);
         Epic epic = this.epics.get(subtask.getEpicId());
         epic.addSubtask(subtask);
+        this.checkAndModifyEpicStatus(epic);
+    }
+
+    public void updateSubtask(Subtask subtask) {
+        Subtask subtaskForUpdate = this.subtasks.get(subtask.getId());
+        subtaskForUpdate.setTitle(subtask.getTitle());
+        subtaskForUpdate.setDescription(subtask.getDescription());
+        subtaskForUpdate.setStatus(subtask.getStatus());
+        subtaskForUpdate.setEpicId(subtask.getEpicId());
+        Epic epic = this.epics.get(subtask.getEpicId());
         this.checkAndModifyEpicStatus(epic);
     }
 
