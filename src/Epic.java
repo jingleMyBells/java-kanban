@@ -3,7 +3,7 @@ import java.util.HashMap;
 import java.util.Objects;
 
 public class Epic extends Task{
-    private ArrayList<Subtask> tasks;
+    private final ArrayList<Subtask> tasks;
     public Epic(String title, String description) {
         super(title, description, Status.NEW);
         tasks = new ArrayList<>();
@@ -19,10 +19,6 @@ public class Epic extends Task{
         }
     }
 
-    public ArrayList<Subtask> getAllEpicSubtasks() {
-        return tasks;
-    }
-
     public void removeSubtask(Subtask subtask) {
         this.tasks.remove(subtask);
     }
@@ -36,18 +32,13 @@ public class Epic extends Task{
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(this.getId(), this.getTitle(), this.getDescription(), this.getStatus());
-    }
-
-    @Override
     public String toString() {
         return this.getClass() + "{" +
-                "id=" + this.getId() +
-                ", title='" + this.getTitle() + '\'' +
-                ", description='" + this.getDescription() + '\'' +
-                ", status=" + this.getStatus() +
-                ", subtasks" + this.getAllEpicSubtasks() + '\'' +
+                "id=" + this.id +
+                ", title='" + this.title + '\'' +
+                ", description='" + this.description + '\'' +
+                ", status=" + this.status +
+                ", subtasks" + this.tasks + '\'' +
                 '}';
     }
 

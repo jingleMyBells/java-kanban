@@ -16,10 +16,6 @@ public class TaskManager {
         this.subtasks = new HashMap<>();
     }
 
-    private int getAutoIncrement() {
-        return this.autoIncrement;
-    }
-
     private int createNewTaskId() {
         return ++this.autoIncrement;
     }
@@ -78,6 +74,10 @@ public class TaskManager {
         for (int subtaskId : idsToDelete) {
             this.subtasks.remove(subtaskId);
         }
+    }
+
+    public ArrayList<Subtask> getAllEpicSubtasks(Epic epic) {
+        return epic.getTasks();
     }
 
     public void checkAndModifyEpicStatus(Epic epic) {
