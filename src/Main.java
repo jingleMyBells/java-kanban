@@ -44,7 +44,8 @@ public class Main {
     }
 
     public static void myTest() {
-        TaskManager taskManager = new InMemoryTaskManager();
+//        TaskManager taskManager = new InMemoryTaskManager();
+        TaskManager taskManager = Managers.getDefault();
 
         Task newTask = new Task("Создать вторую задачу", "Вот тебе первая таска", Status.NEW);
         taskManager.createTask(newTask);
