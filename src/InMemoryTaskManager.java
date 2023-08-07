@@ -8,6 +8,8 @@ public class InMemoryTaskManager implements TaskManager {
     private final HashMap<Integer, Epic> epics;
     private final HashMap<Integer, Subtask> subtasks;
 
+    private ArrayList<Task> taskHistory = new ArrayList<>();
+
     InMemoryTaskManager() {
         this.autoIncrement = 0;
         this.tasks = new HashMap<>();
@@ -46,7 +48,9 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Task getTaskById(int id) {
-        return this.tasks.get(id);
+        Task task = this.tasks.get(id);
+        this.taskHistory.add(task);
+        return task;
     }
 
     @Override
@@ -81,7 +85,9 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Epic getEpicById(int id) {
-        return this.epics.get(id);
+        Epic epic = this.epics.get(id);
+        this.taskHistory.add(epic);
+        return epic;
     }
 
     @Override
@@ -166,7 +172,9 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Subtask getSubtaskById(int id) {
-        return this.subtasks.get(id);
+        Subtask subtask = this.subtasks.get(id);
+        this.taskHistory.add(subtask);
+        return subtask;
     }
 
     @Override
@@ -176,4 +184,11 @@ public class InMemoryTaskManager implements TaskManager {
         this.subtasks.remove(id);
         this.checkAndModifyEpicStatus(epic);
     }
+
+    @Override
+    public ArrayList<Task> getHistory() {
+        return this.taskHistory;
+    }
+
+
 }
