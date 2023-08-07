@@ -1,29 +1,52 @@
+import java.util.ArrayList;
+
 public class Main {
 
     public static void main(String[] args) {
-        methodForTesting();
+        myTest();
     }
 
-    public static void methodForTesting() {
-        TaskManager taskManager = new TaskManager();
+
+    public static void myTest() {
+        TaskManager taskManager = Managers.getDefault();
 
         Task newTask = new Task("Создать вторую задачу", "Вот тебе первая таска", Status.NEW);
         taskManager.createTask(newTask);
+        System.out.println("Тест1");
+        Task task = taskManager.getTaskById(1);
+        if (task.getTitle().equals("Создать вторую задачу")) {
+            System.out.println("Тест1 пройден");
+        }
 
+        System.out.println("Тест2");
         Task newTask2 = new Task("Закончить с тасками", "После этого перейди к эпикам", Status.NEW);
         taskManager.createTask(newTask2);
 
-        System.out.println("Список задач: " + taskManager.getAllTasks());
-        System.out.println("Список эпиков: " + taskManager.getAllEpics());
-        System.out.println("Список подзадач: " + taskManager.getAllSubtasks());
+        Task task2 = taskManager.getTaskById(2);
+
+        if (task2.getStatus() == Status.NEW) {
+            System.out.println("Тест2 пройден");
+        }
 
         Epic newEpic = new Epic("Первый эпик", "Эпик для двух подзадач");
         taskManager.createEpic(newEpic);
+
+        System.out.println("Тест3");
+        Epic epic = taskManager.getEpicById(3);
+        if (epic.getStatus() == Status.NEW) {
+            System.out.println("Тест3 пройден");
+        }
+
 
         Subtask subtask1 = new Subtask("Первая подзадача", "Для первого эпика", newEpic.getId());
         taskManager.createSubtask(subtask1);
         Subtask subtask2 = new Subtask("Вторая подзадача", "Для первого же эпика", newEpic.getId());
         taskManager.createSubtask(subtask2);
+
+        System.out.println("Тест4");
+        if (taskManager.getAllSubtasks().contains(subtask1)) {
+            System.out.println("Тест4 пройден");
+        }
 
         Epic newEpic2 = new Epic("Второй эпик", "Эпик для одной подзадачи");
         taskManager.createEpic(newEpic2);
@@ -32,13 +55,61 @@ public class Main {
         taskManager.createSubtask(subtask3);
 
         subtask2.setStatus(Status.DONE);
-        taskManager.updateTask(subtask2);
+        taskManager.updateSubtask(subtask2);
 
-        taskManager.deleteAllTasks();
-        taskManager.deleteSubtaskById(subtask2.getId());
+        System.out.println("Тест5");
+        if (newEpic.getStatus() == Status.IN_PROGRESS) {
+            System.out.println("Тест5 пройден");
+        } else {
+            System.out.println("Тест5 не пройден");
+        }
 
-        System.out.println("Список задач: " + taskManager.getAllTasks());
-        System.out.println("Список эпиков: " + taskManager.getAllEpics());
-        System.out.println("Список подзадач: " + taskManager.getAllSubtasks());
+        taskManager.deleteEpicById(3);
+
+        System.out.println("Тест6");
+        if (taskManager.getAllSubtasks().contains(subtask1)) {
+            System.out.println("Тест6 не пройден");
+        } else {
+            System.out.println("Тест6 пройден");
+        }
+
+        System.out.println("Тест7");
+
+        taskManager.getTaskById(task.getId());
+        taskManager.getSubtaskById(subtask3.getId());
+        taskManager.getEpicById(6);
+        taskManager.getEpicById(6);
+
+        ArrayList<Task> history = taskManager.getHistoryManager().getHistory();
+        int secondTaskIdInHistory = history.get(3).getId();
+        int thirdTaskIdInHistory = history.get(4).getId();
+        int fifthTaskIdInHistory = history.get(5).getId();
+        boolean isTestPassed = (secondTaskIdInHistory == 1) && (thirdTaskIdInHistory == 7)
+                && (fifthTaskIdInHistory == 6);
+
+        if (isTestPassed) {
+            System.out.println("Тест7 пройден");
+        } else {
+            System.out.println("Тест7 не пройден");
+        }
+
+        System.out.println("Тест8");
+        taskManager.getTaskById(task.getId());
+        taskManager.getTaskById(task.getId());
+        taskManager.getTaskById(task.getId());
+        taskManager.getTaskById(task.getId());
+        taskManager.getTaskById(task.getId());
+        taskManager.getTaskById(task.getId());
+
+        if (history.size() > 10) {
+            System.out.println("Тест8 не пройден");
+        } else {
+            System.out.println("Тест8 пройден");
+        }
+
+
+
+
+
     }
 }
