@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.Collection;
 
 public class Main {
 
@@ -81,7 +80,7 @@ public class Main {
         taskManager.getEpicById(6);
         taskManager.getEpicById(6);
 
-        ArrayList<Task> history = taskManager.getHistory();
+        ArrayList<Task> history = taskManager.getHistoryManager().getHistory();
         int secondTaskIdInHistory = history.get(3).getId();
         int thirdTaskIdInHistory = history.get(4).getId();
         int fifthTaskIdInHistory = history.get(5).getId();
@@ -93,6 +92,22 @@ public class Main {
         } else {
             System.out.println("Тест7 не пройден");
         }
+
+        System.out.println("Тест8");
+        taskManager.getTaskById(task.getId());
+        taskManager.getTaskById(task.getId());
+        taskManager.getTaskById(task.getId());
+        taskManager.getTaskById(task.getId());
+        taskManager.getTaskById(task.getId());
+        taskManager.getTaskById(task.getId());
+
+        if (history.size() > 10) {
+            System.out.println("Тест8 не пройден");
+        } else {
+            System.out.println("Тест8 пройден");
+        }
+
+
 
 
 

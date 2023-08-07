@@ -1,6 +1,5 @@
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 
 public interface TaskManager {
 
@@ -46,5 +45,5 @@ public interface TaskManager {
 
     void deleteSubtaskById(int id);
 
-    ArrayList<Task> getHistory();
+    HistoryManager getHistoryManager();
 }
