@@ -1,12 +1,13 @@
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
 public class InMemoryTaskManager implements TaskManager {
 
     private int autoIncrement;
-    private final HashMap<Integer, Task> tasks;
-    private final HashMap<Integer, Epic> epics;
-    private final HashMap<Integer, Subtask> subtasks;
+    private final Map<Integer, Task> tasks;
+    private final Map<Integer, Epic> epics;
+    private final Map<Integer, Subtask> subtasks;
 
     private final HistoryManager historyManager;
 
@@ -19,8 +20,7 @@ public class InMemoryTaskManager implements TaskManager {
         this.historyManager = Managers.getDefaultHistory();
     }
 
-    @Override
-    public int createNewTaskId() {
+    private int createNewTaskId() {
         return ++this.autoIncrement;
     }
 

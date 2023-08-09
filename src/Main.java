@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.List;
 
 public class Main {
 
@@ -80,7 +81,7 @@ public class Main {
         taskManager.getEpicById(6);
         taskManager.getEpicById(6);
 
-        ArrayList<Task> history = taskManager.getHistoryManager().getHistory();
+        List<Task> history = taskManager.getHistoryManager().getHistory();
         int secondTaskIdInHistory = history.get(3).getId();
         int thirdTaskIdInHistory = history.get(4).getId();
         int fifthTaskIdInHistory = history.get(5).getId();
