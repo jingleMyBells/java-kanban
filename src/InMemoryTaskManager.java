@@ -1,7 +1,5 @@
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+
 public class InMemoryTaskManager implements TaskManager {
 
     private int autoIncrement;
@@ -188,8 +186,8 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public HistoryManager getHistoryManager() {
-        return this.historyManager;
+    public List<Task> getHistory() {
+        return this.historyManager.getHistory();
     }
 
 }
