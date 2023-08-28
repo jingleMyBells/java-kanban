@@ -5,8 +5,8 @@ import java.util.Map;
 
 public class InMemoryHistoryManager implements HistoryManager {
 
-    private final CustomLinkedList<Task> taskHistory = new CustomLinkedList<>();
-    private Map<Integer, Node<Task>> historyMap = new HashMap<>();
+    private final CustomLinkedList taskHistory = new CustomLinkedList();
+    private Map<Integer, Node> historyMap = new HashMap<>();
 
 
     @Override
@@ -17,25 +17,26 @@ public class InMemoryHistoryManager implements HistoryManager {
     @Override
     public void add(Task task) {
         if (task != null) {
-            Node<Task> newNode = taskHistory.linkLast(task);
-            if (historyMap.containsKey(task.getId())) {
-                taskHistory.removeNode(historyMap.get(task.getId()));
-            }
+            Node newNode = taskHistory.linkLast(task);
+            this.remove(task.getId());
             historyMap.put(task.getId(), newNode);
         }
     }
 
     @Override
     public void remove(int id) {
-        taskHistory.removeNode(historyMap.get(id));
+        if (historyMap.containsKey(id)) {
+            taskHistory.removeNode(historyMap.get(id));
+        }
     }
 
-    public class CustomLinkedList<Task>{
-        public Node<Task> head;
-        public Node<Task> tail;
 
-        public Node<Task> linkLast(Task task) {
-            Node<Task> newNode = new Node<>(task);
+    public class CustomLinkedList{
+        public Node head;
+        public Node tail;
+
+        public Node linkLast(Task task) {
+            Node newNode = new Node(task);
             if (head == null) {
                 head = newNode;
                 tail = newNode;
@@ -48,7 +49,7 @@ public class InMemoryHistoryManager implements HistoryManager {
         public ArrayList<Task> getTasks() {
             List<Task> tasks = new ArrayList<>();
             if (head != null) {
-                Node<Task> currentNode = head;
+                Node currentNode = head;
                 tasks.add(head.task);
                 while (currentNode.next != null) {
                     tasks.add(currentNode.task);
@@ -58,7 +59,7 @@ public class InMemoryHistoryManager implements HistoryManager {
             return new ArrayList<>(tasks);
         }
 
-        public void removeNode(Node<Task> node) {
+        public void removeNode(Node node) {
             node.next.prev = node.prev.next;
             node.prev = null;
             node.next = null;
