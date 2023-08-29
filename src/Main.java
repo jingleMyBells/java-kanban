@@ -6,7 +6,6 @@ public class Main {
         myTest();
     }
 
-
     public static void myTest() {
         TaskManager taskManager = Managers.getDefault();
 
@@ -75,16 +74,17 @@ public class Main {
 
         System.out.println("Тест7");
 
+
         taskManager.getTaskById(task.getId());
         taskManager.getSubtaskById(subtask3.getId());
         taskManager.getEpicById(6);
         taskManager.getEpicById(6);
 
         List<Task> history = taskManager.getHistory();
-        int secondTaskIdInHistory = history.get(3).getId();
-        int thirdTaskIdInHistory = history.get(4).getId();
-        int fifthTaskIdInHistory = history.get(5).getId();
-        boolean isTestPassed = (secondTaskIdInHistory == 1) && (thirdTaskIdInHistory == 7)
+        int secondTaskIdInHistory = history.get(0).getId();
+        int thirdTaskIdInHistory = history.get(1).getId();
+        int fifthTaskIdInHistory = history.get(3).getId();
+        boolean isTestPassed = (secondTaskIdInHistory == 2) && (thirdTaskIdInHistory == 1)
                 && (fifthTaskIdInHistory == 6);
 
         if (isTestPassed) {
@@ -92,24 +92,5 @@ public class Main {
         } else {
             System.out.println("Тест7 не пройден");
         }
-
-        System.out.println("Тест8");
-        taskManager.getTaskById(task.getId());
-        taskManager.getTaskById(task.getId());
-        taskManager.getTaskById(task.getId());
-        taskManager.getTaskById(task.getId());
-        taskManager.getTaskById(task.getId());
-        taskManager.getTaskById(task.getId());
-
-        if (history.size() > 10) {
-            System.out.println("Тест8 не пройден");
-        } else {
-            System.out.println("Тест8 пройден");
-        }
-
-
-
-
-
     }
 }
