@@ -34,13 +34,8 @@ public class InMemoryHistoryManager implements HistoryManager {
             tail.prev = oldTail;
             oldTail.next = tail;
         } else {
-            if (head != null) {
-                tail = node;
-                head.next = tail;
-                tail.prev = head;
-            } else {
-                head = node;
-            }
+            head = node;
+            tail = node;
         }
     }
 
@@ -48,27 +43,26 @@ public class InMemoryHistoryManager implements HistoryManager {
         if (node == null) {
             return;
         }
-        if (head == null && tail == null) {
-            return;
-        }
-        if (head == node) {
-            head = node.next;
-            if (head != null) {
-                head.prev = null;
-            }
-        } else if (tail == node) {
-            tail = node.prev;
-            tail.next = null;
+        final Node next = node.next;
+        final Node prev = node.prev;
+        if (prev != null) {
+            prev.next = next;
         } else {
-            node.prev.next = node.next;
-            node.next.prev = node.prev;
+            head = next;
         }
-        node.next = null;
-        node.prev = null;
+        if (next != null) {
+            next.prev = prev;
+        } else {
+            tail = prev;
+        }
+
     }
 
     @Override
     public void add(Task task) {
+        if (task == null) {
+            return;
+        }
         remove(task.getId());
         Node newNode = new Node(task);
         linkLast(newNode);
@@ -77,8 +71,7 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public void remove(int id) {
-        removeNode(historyMap.get(id));
-        historyMap.remove(id);
+        removeNode(historyMap.remove(id));
     }
 
     private static class Node {
