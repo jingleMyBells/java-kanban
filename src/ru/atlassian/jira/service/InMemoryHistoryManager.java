@@ -1,7 +1,13 @@
-import java.util.ArrayList;
+package ru.atlassian.jira.service;
+
 import java.util.List;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Objects;
+import java.util.LinkedList;
+
+import ru.atlassian.jira.model.Task;
 
 public class InMemoryHistoryManager implements HistoryManager {
 
@@ -13,7 +19,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     @Override
     public List<Task> getHistory() {
         Node cursor = head;
-        List<Task> tasks = new ArrayList<>();
+        List<Task> tasks = new LinkedList<>();
         while (cursor != null) {
             tasks.add(cursor.task);
             cursor = cursor.next;
@@ -74,5 +80,31 @@ public class InMemoryHistoryManager implements HistoryManager {
         removeNode(historyMap.get(id));
         historyMap.remove(id);
     }
+
+    private static class Node {
+        public Task task;
+        public Node next;
+        public Node prev;
+
+        public Node(Task task) {
+            this.task = task;
+            this.next = null;
+            this.prev = null;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Node node = (Node) o;
+            return Objects.equals(task, node.task);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(task);
+        }
+    }
+
 
 }

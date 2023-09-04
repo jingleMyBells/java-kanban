@@ -1,4 +1,10 @@
+package ru.atlassian.jira.service;
+
 import java.util.*;
+import ru.atlassian.jira.model.Task;
+import ru.atlassian.jira.model.Epic;
+import ru.atlassian.jira.model.Subtask;
+import ru.atlassian.jira.model.Status;
 
 public class InMemoryTaskManager implements TaskManager {
 

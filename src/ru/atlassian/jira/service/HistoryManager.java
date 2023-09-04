@@ -1,4 +1,8 @@
+package ru.atlassian.jira.service;
+
 import java.util.List;
+import ru.atlassian.jira.model.Task;
+
 
 public interface HistoryManager {
 

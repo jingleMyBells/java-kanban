@@ -1,3 +1,5 @@
+package ru.atlassian.jira.service;
+
 public class Managers {
 
     public static TaskManager getDefault() {
