@@ -1,6 +1,8 @@
+package ru.atlassian.jira.model;
 import java.util.ArrayList;
 
-public class Epic extends Task{
+
+public class Epic extends Task {
     private final ArrayList<Subtask> tasks;
     public Epic(String title, String description) {
         super(title, description, Status.NEW);
