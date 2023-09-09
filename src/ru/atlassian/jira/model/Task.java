@@ -60,13 +60,17 @@ public class Task {
         return Objects.hash(id, title, description, status);
     }
 
+//    @Override
+//    public String toString() {
+//        return this.getClass() + "{" +
+//                "id=" + id +
+//                ", title='" + title + '\'' +
+//                ", description='" + description + '\'' +
+//                ", status=" + status +
+//                '}';
+//    }
     @Override
     public String toString() {
-        return this.getClass() + "{" +
-                "id=" + id +
-                ", title='" + title + '\'' +
-                ", description='" + description + '\'' +
-                ", status=" + status +
-                '}';
+        return String.valueOf(id) + this.getClass() + title + status + description;
     }
 }

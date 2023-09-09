@@ -8,12 +8,12 @@ import ru.atlassian.jira.model.Status;
 
 public class InMemoryTaskManager implements TaskManager {
 
-    private int autoIncrement;
-    private final Map<Integer, Task> tasks;
-    private final Map<Integer, Epic> epics;
-    private final Map<Integer, Subtask> subtasks;
+    protected int autoIncrement;
+    protected final Map<Integer, Task> tasks;
+    protected final Map<Integer, Epic> epics;
+    protected final Map<Integer, Subtask> subtasks;
 
-    private final HistoryManager historyManager;
+    protected final HistoryManager historyManager;
 
 
     InMemoryTaskManager() {
@@ -180,11 +180,11 @@ public class InMemoryTaskManager implements TaskManager {
         return this.historyManager.getHistory();
     }
 
-    private int createNewTaskId() {
+    protected int createNewTaskId() {
         return ++this.autoIncrement;
     }
 
-    private void checkAndModifyEpicStatus(Epic epic) {
+    protected void checkAndModifyEpicStatus(Epic epic) {
         int tasksCounter = epic.getTasks().size();
         if (tasksCounter > 0) {
             int newTasks = 0;
