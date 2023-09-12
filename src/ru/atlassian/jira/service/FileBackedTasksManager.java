@@ -20,10 +20,12 @@ import java.util.List;
 public class FileBackedTasksManager extends InMemoryTaskManager {
 
     private final String filename = "tasks.csv";
+    private final String historyFilename = "tasks.csv";
 
     FileBackedTasksManager() {
         super();
         restoreFromFile();
+        restoreHistoryFromFile();
     }
 
     @Override
@@ -42,6 +44,13 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     public void deleteAllTasks() {
         super.deleteAllTasks();
         save();
+    }
+
+    @Override
+    public Task getTaskById(int id) {
+        Task task = super.getTaskById(id);
+        saveHistory();
+        return task;
     }
 
     @Override
@@ -69,6 +78,13 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     @Override
+    public Epic getEpicById(int id) {
+        Epic epic = super.getEpicById(id);
+        saveHistory();
+        return epic;
+    }
+
+    @Override
     public void deleteEpicById(int id) {
         super.deleteEpicById(id);
         save();
@@ -93,6 +109,13 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     @Override
+    public Subtask getSubtaskById(int id) {
+        Subtask subtask = super.getSubtaskById(id);
+        saveHistory();
+        return subtask;
+    }
+
+    @Override
     public void deleteSubtaskById(int id) {
         super.deleteSubtaskById(id);
         save();
@@ -107,6 +130,17 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         try (FileWriter writer = new FileWriter(filename, StandardCharsets.UTF_8)) {
             for (Map.Entry<Integer, Task> entry : allTasks.entrySet()) {
                 writer.write(entry.getValue().toString() + "\n");
+            }
+        } catch (IOException exception) {
+            System.out.println("ТУТ НАДО ВЫБРОСИТЬ КАСТОМНОЕ ИСКЛЮЧЕНИЕ");
+        }
+    }
+
+    private void saveHistory() {
+        List<Task> history = this.getHistory();
+        try (FileWriter writer = new FileWriter(historyFilename, StandardCharsets.UTF_8)) {
+            for (Task task : history) {
+                writer.write(task.getId() + ",");
             }
         } catch (IOException exception) {
             System.out.println("ТУТ НАДО ВЫБРОСИТЬ КАСТОМНОЕ ИСКЛЮЧЕНИЕ");
@@ -151,8 +185,32 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 }
             }
         }
-
     }
+
+
+    public void restoreHistoryFromFile() {
+        Path path = Paths.get("", historyFilename);
+        StringBuilder result = new StringBuilder();
+        if (Files.exists(path)) {
+            try (FileReader reader = new FileReader(filename, StandardCharsets.UTF_8);
+                 BufferedReader bufferedReader = new BufferedReader(reader)) {
+                while (bufferedReader.ready()) {
+                    result.append(bufferedReader.readLine());
+                    result.append(",");
+                }
+            } catch (IOException exception) {
+                System.out.println("ТУТ НАДО ВЫБРОСИТЬ КАСТОМНОЕ ИСКЛЮЧЕНИЕ");
+            }
+        } else {
+            System.out.println("Не обнаружено предыдущих сохранений");
+        }
+        String[] taskIds = String.valueOf(result).split(",");
+        for (String id : taskIds) {
+            this.historyManager.add(this.getTaskById(Integer.parseInt(id)));
+        }
+    }
+
+
 
     public Task getTaskFromString(String value) {
         String[] splitValue = value.split(",");
