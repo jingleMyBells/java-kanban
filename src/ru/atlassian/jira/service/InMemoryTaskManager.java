@@ -126,11 +126,16 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void createSubtask(Subtask subtask) {
-        subtask.setId(createNewTaskId());
-        this.subtasks.put(subtask.getId(), subtask);
         Epic epic = this.epics.get(subtask.getEpicId());
-        epic.addSubtask(subtask);
-        this.checkAndModifyEpicStatus(epic);
+        if (epic != null) {
+            subtask.setId(createNewTaskId());
+            this.subtasks.put(subtask.getId(), subtask);
+
+            epic.addSubtask(subtask);
+            this.checkAndModifyEpicStatus(epic);
+        } else {
+            System.out.println("Эпик не найден, подзадача не сохранена");
+        }
     }
 
     @Override

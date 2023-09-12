@@ -71,6 +71,9 @@ public class Task {
 //    }
     @Override
     public String toString() {
-        return String.valueOf(id) + this.getClass() + title + status + description;
+        return String.join(
+                ",", String.valueOf(id), "Task",
+                title, status.toString(), description
+        );
     }
 }

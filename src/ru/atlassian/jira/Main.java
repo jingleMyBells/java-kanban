@@ -4,13 +4,40 @@ import ru.atlassian.jira.model.Task;
 import ru.atlassian.jira.model.Epic;
 import ru.atlassian.jira.model.Status;
 import ru.atlassian.jira.model.Subtask;
+import ru.atlassian.jira.service.FileBackedTasksManager;
 import ru.atlassian.jira.service.Managers;
 import ru.atlassian.jira.service.TaskManager;
+
 
 public class Main {
 
     public static void main(String[] args) {
-        myTest();
+//        myTest();
+        fileTest();
+    }
+
+    public static void fileTest() {
+        FileBackedTasksManager fileManager = Managers.getFileBacked();
+
+//        Task newTask = new Task("Название без запятых", "Записать задачу в файл", Status.NEW);
+//        fileManager.createTask(newTask);
+//
+//        Epic newEpic = new Epic("Тестовый эпик", "КУКлаКОЛДуна");
+//        fileManager.createEpic(newEpic);
+//
+//        Subtask newSubtask = new Subtask("Тестовая подзадача", "авпджлоажрд", newEpic.getId());
+//        fileManager.createSubtask(newSubtask);
+
+//        Task oldTask = fileManager.getTaskById(1);
+//        System.out.println(oldTask);
+//        fileManager.deleteTaskById(oldTask.getId());
+
+
+
+
+        System.out.println(fileManager.getAllTasks());
+        System.out.println(fileManager.getAllEpics());
+        System.out.println(fileManager.getAllSubtasks());
     }
 
     public static void myTest() {

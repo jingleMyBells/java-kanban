@@ -26,12 +26,16 @@ public class Subtask extends Task {
 
     @Override
     public String toString() {
-        return this.getClass() + "{" +
-                "id=" + this.id +
-                ", title='" + this.title + '\'' +
-                ", description='" + this.description + '\'' +
-                ", epicId='" + this.epicId + '\'' +
-                ", status=" + this.status +
-                '}';
+//        return this.getClass() + "{" +
+//                "id=" + this.id +
+//                ", title='" + this.title + '\'' +
+//                ", description='" + this.description + '\'' +
+//                ", epicId='" + this.epicId + '\'' +
+//                ", status=" + this.status +
+//                '}';
+        return String.join(
+                ",", String.valueOf(id), "Subtask",
+                title, status.toString(), description, String.valueOf(epicId)
+        );
     }
 }
