@@ -1,4 +1,5 @@
 package ru.atlassian.jira;
+import java.util.DoubleSummaryStatistics;
 import java.util.List;
 import ru.atlassian.jira.model.Task;
 import ru.atlassian.jira.model.Epic;
@@ -19,25 +20,37 @@ public class Main {
     public static void fileTest() {
         FileBackedTasksManager fileManager = Managers.getFileBacked();
 
-//        Task newTask = new Task("Название без запятых", "Записать задачу в файл", Status.NEW);
-//        fileManager.createTask(newTask);
-//
-//        Epic newEpic = new Epic("Тестовый эпик", "КУКлаКОЛДуна");
-//        fileManager.createEpic(newEpic);
-//
-//        Subtask newSubtask = new Subtask("Тестовая подзадача", "авпджлоажрд", newEpic.getId());
-//        fileManager.createSubtask(newSubtask);
+        Task newTask = new Task("Название без запятых", "Записать задачу в файл", Status.NEW);
+        fileManager.createTask(newTask);
 
-//        Task oldTask = fileManager.getTaskById(1);
-//        System.out.println(oldTask);
-//        fileManager.deleteTaskById(oldTask.getId());
+        Epic newEpic = new Epic("Тестовый эпик", "КУКлаКОЛДуна");
+        fileManager.createEpic(newEpic);
+
+        Subtask newSubtask = new Subtask("Тестовая подзадача", "авпджлоажрд", newEpic.getId());
+        fileManager.createSubtask(newSubtask);
 
 
+        System.out.println("history restored: " + fileManager.getHistory());
+        System.out.println("-------");
+        System.out.println("все задачи: " + fileManager.getAllTasks());
+        System.out.println("все эпики: " + fileManager.getAllEpics());
+        System.out.println("все подзадачи: " + fileManager.getAllSubtasks());
+        System.out.println("-------");
+
+        Task getSubtask = fileManager.getSubtaskById(3);
+        Task getEpic = fileManager.getEpicById(2);
+        Task getTask = fileManager.getTaskById(1);
+
+        System.out.println("history modified" + fileManager.getHistory());
+        System.out.println("-------");
+
+        fileManager.deleteTaskById(getTask.getId());
+
+        System.out.println("все задачи: " + fileManager.getAllTasks());
+        System.out.println("все эпики: " + fileManager.getAllEpics());
+        System.out.println("все подзадачи: " + fileManager.getAllSubtasks());
 
 
-        System.out.println(fileManager.getAllTasks());
-        System.out.println(fileManager.getAllEpics());
-        System.out.println(fileManager.getAllSubtasks());
     }
 
     public static void myTest() {

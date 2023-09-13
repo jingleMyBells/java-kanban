@@ -20,7 +20,7 @@ import java.util.List;
 public class FileBackedTasksManager extends InMemoryTaskManager {
 
     private final String filename = "tasks.csv";
-    private final String historyFilename = "tasks.csv";
+    private final String historyFilename = "history.csv";
 
     FileBackedTasksManager() {
         super();
@@ -126,7 +126,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         allTasks.putAll(this.tasks);
         allTasks.putAll(this.epics);
         allTasks.putAll(this.subtasks);
-        System.out.println(allTasks);
         try (FileWriter writer = new FileWriter(filename, StandardCharsets.UTF_8)) {
             for (Map.Entry<Integer, Task> entry : allTasks.entrySet()) {
                 writer.write(entry.getValue().toString() + "\n");
@@ -192,7 +191,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         Path path = Paths.get("", historyFilename);
         StringBuilder result = new StringBuilder();
         if (Files.exists(path)) {
-            try (FileReader reader = new FileReader(filename, StandardCharsets.UTF_8);
+            try (FileReader reader = new FileReader(historyFilename, StandardCharsets.UTF_8);
                  BufferedReader bufferedReader = new BufferedReader(reader)) {
                 while (bufferedReader.ready()) {
                     result.append(bufferedReader.readLine());
@@ -206,7 +205,11 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         }
         String[] taskIds = String.valueOf(result).split(",");
         for (String id : taskIds) {
-            this.historyManager.add(this.getTaskById(Integer.parseInt(id)));
+            if (!id.isEmpty()) {
+                this.historyManager.add(this.getTaskById(Integer.parseInt(id)));
+                this.historyManager.add(this.getEpicById(Integer.parseInt(id)));
+                this.historyManager.add(this.getSubtaskById(Integer.parseInt(id)));
+            }
         }
     }
 
