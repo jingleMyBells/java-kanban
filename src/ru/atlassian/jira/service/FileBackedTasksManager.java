@@ -5,6 +5,7 @@ import ru.atlassian.jira.model.Epic;
 import ru.atlassian.jira.model.Status;
 import ru.atlassian.jira.model.Subtask;
 import ru.atlassian.jira.model.Task;
+import ru.atlassian.jira.model.TaskType;
 import ru.atlassian.jira.exceptions.ManagerSaveException;
 
 import java.io.FileReader;
@@ -238,14 +239,14 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         if (!tasksToRestore.isEmpty()) {
             for (String line : tasksToRestore) {
                 Task task = getTaskFromString(line);
-                switch (task.getClass().toString()) {
-                    case ("class ru.atlassian.jira.model.Task"):
+                switch (TaskType.valueOf(task.getClass().getSimpleName().toUpperCase())) {
+                    case TASK:
                         this.tasks.put(task.getId(), task);
                         break;
-                    case ("class ru.atlassian.jira.model.Epic"):
+                    case EPIC:
                         this.epics.put(task.getId(), (Epic)task);
                         break;
-                    case ("class ru.atlassian.jira.model.Subtask"):
+                    case SUBTASK:
                         Subtask subtask = (Subtask) task;
                         this.subtasks.put(subtask.getId(), subtask);
                         Epic epic = this.epics.get(subtask.getEpicId());
@@ -289,15 +290,15 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     public Task getTaskFromString(String value) {
         String[] splitValue = value.split(",");
         Task task = null;
-        switch (splitValue[1]) {
-            case ("Task"):
+        switch (TaskType.valueOf(splitValue[1].toUpperCase())) {
+            case TASK:
                 task = new Task(splitValue[2], splitValue[4], Status.valueOf(splitValue[3]));
                 break;
-            case ("Epic"):
+            case EPIC:
                 task = new Epic(splitValue[2], splitValue[4]);
                 task.setStatus(Status.valueOf(splitValue[3]));
                 break;
-            case ("Subtask"):
+            case SUBTASK:
                 task = new Subtask(splitValue[2], splitValue[4], Integer.parseInt(splitValue[5]));
                 break;
         }
