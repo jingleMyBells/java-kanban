@@ -1,7 +1,5 @@
 package ru.atlassian.jira.service;
 
-import java.io.File;
-
 public class Managers {
 
     private Managers() {

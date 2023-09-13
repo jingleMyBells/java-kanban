@@ -1,4 +1,5 @@
 package ru.atlassian.jira.service;
+
 import ru.atlassian.jira.exceptions.ManagerEmptyStorageException;
 import ru.atlassian.jira.exceptions.ManagerReadException;
 import ru.atlassian.jira.model.Epic;
@@ -8,14 +9,14 @@ import ru.atlassian.jira.model.Task;
 import ru.atlassian.jira.model.TaskType;
 import ru.atlassian.jira.exceptions.ManagerSaveException;
 
-import java.io.FileReader;
 import java.io.BufferedReader;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -219,7 +220,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
 
-    public void restoreFromFile() throws ManagerReadException, ManagerEmptyStorageException {
+    private void restoreFromFile() throws ManagerReadException, ManagerEmptyStorageException {
         List<String> tasksToRestore = new ArrayList<>();
         Path path = Paths.get("", filename);
 
@@ -259,7 +260,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
 
-    public void restoreHistoryFromFile() throws ManagerReadException, ManagerEmptyStorageException {
+    private void restoreHistoryFromFile() throws ManagerReadException, ManagerEmptyStorageException {
         Path path = Paths.get("", historyFilename);
         StringBuilder result = new StringBuilder();
         if (Files.exists(path)) {
@@ -287,7 +288,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
 
 
-    public Task getTaskFromString(String value) {
+    private Task getTaskFromString(String value) {
         String[] splitValue = value.split(",");
         Task task = null;
         switch (TaskType.valueOf(splitValue[1].toUpperCase())) {
