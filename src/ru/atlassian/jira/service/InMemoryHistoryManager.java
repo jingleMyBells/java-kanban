@@ -46,13 +46,12 @@ public class InMemoryHistoryManager implements HistoryManager {
     private void linkLast(Node node) {
         if (tail != null) {
             Node oldTail = tail;
-            tail = node;
-            tail.prev = oldTail;
-            oldTail.next = tail;
+            node.prev = oldTail;
+            oldTail.next = node;
         } else {
             head = node;
-            tail = node;
         }
+        tail = node;
     }
 
     private void removeNode(Node node) {

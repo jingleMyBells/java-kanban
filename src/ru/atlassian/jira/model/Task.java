@@ -62,11 +62,9 @@ public class Task {
 
     @Override
     public String toString() {
-        return this.getClass() + "{" +
-                "id=" + id +
-                ", title='" + title + '\'' +
-                ", description='" + description + '\'' +
-                ", status=" + status +
-                '}';
+        return String.join(
+                ",", String.valueOf(id), "Task",
+                title, status.toString(), description
+        );
     }
 }

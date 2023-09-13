@@ -8,12 +8,12 @@ import ru.atlassian.jira.model.Status;
 
 public class InMemoryTaskManager implements TaskManager {
 
-    private int autoIncrement;
-    private final Map<Integer, Task> tasks;
-    private final Map<Integer, Epic> epics;
-    private final Map<Integer, Subtask> subtasks;
+    protected int autoIncrement;
+    protected final Map<Integer, Task> tasks;
+    protected final Map<Integer, Epic> epics;
+    protected final Map<Integer, Subtask> subtasks;
 
-    private final HistoryManager historyManager;
+    protected final HistoryManager historyManager;
 
 
     InMemoryTaskManager() {
@@ -126,11 +126,16 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void createSubtask(Subtask subtask) {
-        subtask.setId(createNewTaskId());
-        this.subtasks.put(subtask.getId(), subtask);
         Epic epic = this.epics.get(subtask.getEpicId());
-        epic.addSubtask(subtask);
-        this.checkAndModifyEpicStatus(epic);
+        if (epic != null) {
+            subtask.setId(createNewTaskId());
+            this.subtasks.put(subtask.getId(), subtask);
+
+            epic.addSubtask(subtask);
+            this.checkAndModifyEpicStatus(epic);
+        } else {
+            System.out.println("Эпик не найден, подзадача не сохранена");
+        }
     }
 
     @Override
@@ -180,11 +185,11 @@ public class InMemoryTaskManager implements TaskManager {
         return this.historyManager.getHistory();
     }
 
-    private int createNewTaskId() {
+    protected int createNewTaskId() {
         return ++this.autoIncrement;
     }
 
-    private void checkAndModifyEpicStatus(Epic epic) {
+    protected void checkAndModifyEpicStatus(Epic epic) {
         int tasksCounter = epic.getTasks().size();
         if (tasksCounter > 0) {
             int newTasks = 0;

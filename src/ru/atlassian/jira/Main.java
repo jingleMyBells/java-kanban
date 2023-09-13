@@ -1,16 +1,56 @@
 package ru.atlassian.jira;
+import java.util.DoubleSummaryStatistics;
 import java.util.List;
 import ru.atlassian.jira.model.Task;
 import ru.atlassian.jira.model.Epic;
 import ru.atlassian.jira.model.Status;
 import ru.atlassian.jira.model.Subtask;
+import ru.atlassian.jira.service.FileBackedTasksManager;
 import ru.atlassian.jira.service.Managers;
 import ru.atlassian.jira.service.TaskManager;
+
 
 public class Main {
 
     public static void main(String[] args) {
-        myTest();
+//        myTest();
+        fileTest();
+    }
+
+    public static void fileTest() {
+        FileBackedTasksManager fileManager = Managers.getFileBacked();
+
+        Task newTask = new Task("Название без запятых", "Записать задачу в файл", Status.NEW);
+        fileManager.createTask(newTask);
+
+        Epic newEpic = new Epic("Тестовый эпик", "КУКлаКОЛДуна");
+        fileManager.createEpic(newEpic);
+
+        Subtask newSubtask = new Subtask("Тестовая подзадача", "авпджлоажрд", newEpic.getId());
+        fileManager.createSubtask(newSubtask);
+
+
+        System.out.println("history restored: " + fileManager.getHistory());
+        System.out.println("-------");
+        System.out.println("все задачи: " + fileManager.getAllTasks());
+        System.out.println("все эпики: " + fileManager.getAllEpics());
+        System.out.println("все подзадачи: " + fileManager.getAllSubtasks());
+        System.out.println("-------");
+
+        Task getSubtask = fileManager.getSubtaskById(3);
+        Task getEpic = fileManager.getEpicById(2);
+        Task getTask = fileManager.getTaskById(1);
+
+        System.out.println("history modified" + fileManager.getHistory());
+        System.out.println("-------");
+
+        fileManager.deleteTaskById(getTask.getId());
+
+        System.out.println("все задачи: " + fileManager.getAllTasks());
+        System.out.println("все эпики: " + fileManager.getAllEpics());
+        System.out.println("все подзадачи: " + fileManager.getAllSubtasks());
+
+
     }
 
     public static void myTest() {
