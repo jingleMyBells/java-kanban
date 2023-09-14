@@ -1,5 +1,6 @@
 package ru.atlassian.jira.service;
 
+import com.sun.nio.sctp.SendFailedNotification;
 import ru.atlassian.jira.exceptions.ManagerEmptyStorageException;
 import ru.atlassian.jira.exceptions.ManagerReadException;
 import ru.atlassian.jira.model.Epic;
@@ -120,10 +121,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     private void save() throws ManagerSaveException {
-        Map<Integer, Task> allTasks = new HashMap<>();
-        allTasks.putAll(this.tasks);
-        allTasks.putAll(this.epics);
-        allTasks.putAll(this.subtasks);
+        Map<Integer, Task> allTasks = getAllStoredObjects();
         try (FileWriter writer = new FileWriter(filename, StandardCharsets.UTF_8)) {
             writer.write("id,type,title,status,description,epicId\n");
             for (Map.Entry<Integer, Task> entry : allTasks.entrySet()) {
@@ -185,6 +183,9 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 }
             }
 
+            restoreAutoincrement();
+
+
             String[] taskIds = String.valueOf(tasksToRestore.get(tasksToRestore.size() - 1)).split(",");
             for (String id : taskIds) {
                 if (!id.isEmpty()) {
@@ -194,6 +195,24 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 }
             }
         }
+    }
+
+    private void restoreAutoincrement() {
+        Map<Integer, Task> allTasks = getAllStoredObjects();
+        int maxId = 0;
+        for (Map.Entry<Integer, Task> entry : allTasks.entrySet()) {
+            int id = entry.getValue().getId();
+            maxId = Integer.max(maxId, id);
+        }
+        this.autoIncrement = maxId;
+    }
+
+    private Map<Integer, Task> getAllStoredObjects() {
+        Map<Integer, Task> allTasks = new HashMap<>();
+        allTasks.putAll(this.tasks);
+        allTasks.putAll(this.epics);
+        allTasks.putAll(this.subtasks);
+        return allTasks;
     }
 
 

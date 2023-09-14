@@ -44,7 +44,10 @@ public class Main {
         System.out.println("history modified" + fileManager.getHistory());
         System.out.println("-------");
 
-        fileManager.deleteTaskById(getTask.getId());
+
+        if (getTask != null) {
+            fileManager.deleteTaskById(getTask.getId());
+        }
 
         System.out.println("все задачи: " + fileManager.getAllTasks());
         System.out.println("все эпики: " + fileManager.getAllEpics());
