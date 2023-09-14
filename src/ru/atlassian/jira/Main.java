@@ -18,7 +18,7 @@ public class Main {
     }
 
     public static void fileTest() {
-        FileBackedTasksManager fileManager = Managers.getFileBacked();
+        FileBackedTasksManager fileManager = Managers.getFileBacked("tasks.csv");
 
         Task newTask = new Task("Название без запятых", "Записать задачу в файл", Status.NEW);
         fileManager.createTask(newTask);
@@ -44,7 +44,10 @@ public class Main {
         System.out.println("history modified" + fileManager.getHistory());
         System.out.println("-------");
 
-        fileManager.deleteTaskById(getTask.getId());
+
+        if (getTask != null) {
+            fileManager.deleteTaskById(getTask.getId());
+        }
 
         System.out.println("все задачи: " + fileManager.getAllTasks());
         System.out.println("все эпики: " + fileManager.getAllEpics());
