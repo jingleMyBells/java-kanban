@@ -9,10 +9,7 @@ import ru.atlassian.jira.model.Task;
 import ru.atlassian.jira.model.TaskType;
 import ru.atlassian.jira.exceptions.ManagerSaveException;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -24,55 +21,33 @@ import java.util.List;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
 
-    private final String filename = "tasks.csv";
-    private final String historyFilename = "history.csv";
+//    private final String filename = "tasks.csv";
+    private final File filename;
+//    private final String historyFilename = "history.csv";
+    private final File historyFilename;
 
-    FileBackedTasksManager() {
-        super();
-//        try {
-//            restoreFromFile();
-//        } catch (ManagerReadException | ManagerEmptyStorageException e) {
-//            System.out.println(e.getMessage());
-//        }
+    FileBackedTasksManager(String filename, String historyFilename) {
+        this.filename = new File(filename);
+        this.historyFilename = new File(historyFilename);
         restoreFromFile();
         restoreHistoryFromFile();
-//        try {
-//            restoreHistoryFromFile();
-//        } catch (ManagerReadException | ManagerEmptyStorageException e) {
-//            System.out.println(e.getMessage());
-//        }
     }
 
     @Override
     public void createTask(Task task) {
         super.createTask(task);
-//        try {
-//            save();
-//        } catch (ManagerSaveException e) {
-//            System.out.println(e.getMessage());
-//        }
         save();
     }
 
     @Override
     public void updateTask(Task task) {
         super.updateTask(task);
-//        try {
-//            save();
-//        } catch (ManagerSaveException e) {
-//            System.out.println(e.getMessage());
-//        }
         save();
     }
 
     @Override
     public void deleteAllTasks() {
         super.deleteAllTasks();
-//        try {
-//            save();
-//        } catch (ManagerSaveException e) {
-//            System.out.println(e.getMessage());
-//        }
         save();
     }
 
@@ -90,55 +65,30 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     @Override
     public void deleteTaskById(int id) {
         super.deleteTaskById(id);
-//        try {
-//            save();
-//        } catch (ManagerSaveException e) {
-//            System.out.println(e.getMessage());
-//        }
         save();
     }
 
     @Override
     public void createEpic(Epic epic) {
         super.createEpic(epic);
-//        try {
-//            save();
-//        } catch (ManagerSaveException e) {
-//            System.out.println(e.getMessage());
-//        }
         save();
     }
 
     @Override
     public void updateEpic(Epic epic) {
         super.updateEpic(epic);
-//        try {
-//            save();
-//        } catch (ManagerSaveException e) {
-//            System.out.println(e.getMessage());
-//        }
         save();
     }
 
     @Override
     public void deleteAllEpics() {
         super.deleteAllEpics();
-//        try {
-//            save();
-//        } catch (ManagerSaveException e) {
-//            System.out.println(e.getMessage());
-//        }
         save();
     }
 
     @Override
     public Epic getEpicById(int id) {
         Epic epic = super.getEpicById(id);
-//        try {
-//            saveHistory();
-//        } catch (ManagerSaveException e) {
-//            System.out.println(e.getMessage());
-//        }
         saveHistory();
         return epic;
     }
@@ -146,55 +96,30 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     @Override
     public void deleteEpicById(int id) {
         super.deleteEpicById(id);
-//        try {
-//            save();
-//        } catch (ManagerSaveException e) {
-//            System.out.println(e.getMessage());
-//        }
         save();
     }
 
     @Override
     public void createSubtask(Subtask subtask) {
         super.createSubtask(subtask);
-//        try {
-//            save();
-//        } catch (ManagerSaveException e) {
-//            System.out.println(e.getMessage());
-//        }
         save();
     }
 
     @Override
     public void updateSubtask(Subtask subtask) {
         super.updateSubtask(subtask);
-//        try {
-//            save();
-//        } catch (ManagerSaveException e) {
-//            System.out.println(e.getMessage());
-//        }
         save();
     }
 
     @Override
     public void deleteAllSubtasks() {
         super.deleteAllSubtasks();
-//        try {
-//            save();
-//        } catch (ManagerSaveException e) {
-//            System.out.println(e.getMessage());
-//        }
         save();
     }
 
     @Override
     public Subtask getSubtaskById(int id) {
         Subtask subtask = super.getSubtaskById(id);
-//        try {
-//            saveHistory();
-//        } catch (ManagerSaveException e) {
-//            System.out.println(e.getMessage());
-//        }
         saveHistory();
         return subtask;
     }
@@ -202,11 +127,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     @Override
     public void deleteSubtaskById(int id) {
         super.deleteSubtaskById(id);
-//        try {
-//            save();
-//        } catch (ManagerSaveException e) {
-//            System.out.println(e.getMessage());
-//        }
         save();
     }
 
@@ -238,9 +158,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
     private void restoreFromFile() throws ManagerReadException, ManagerEmptyStorageException {
         List<String> tasksToRestore = new ArrayList<>();
-        Path path = Paths.get("", filename);
 
-        if (Files.exists(path)) {
+        if (filename.exists()) {
             try (FileReader reader = new FileReader(filename, StandardCharsets.UTF_8);
                  BufferedReader bufferedReader = new BufferedReader(reader)) {
                 while (bufferedReader.ready()) {
@@ -268,7 +187,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                         this.subtasks.put(subtask.getId(), subtask);
                         Epic epic = this.epics.get(subtask.getEpicId());
                         epic.addSubtask(subtask);
-                        this.checkAndModifyEpicStatus(epic);
+//                        this.checkAndModifyEpicStatus(epic);
                         break;
                 }
             }
@@ -277,9 +196,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
 
     private void restoreHistoryFromFile() throws ManagerReadException, ManagerEmptyStorageException {
-        Path path = Paths.get("", historyFilename);
         StringBuilder result = new StringBuilder();
-        if (Files.exists(path)) {
+        if (historyFilename.exists()) {
             try (FileReader reader = new FileReader(historyFilename, StandardCharsets.UTF_8);
                  BufferedReader bufferedReader = new BufferedReader(reader)) {
                 while (bufferedReader.ready()) {
@@ -295,9 +213,9 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         String[] taskIds = String.valueOf(result).split(",");
         for (String id : taskIds) {
             if (!id.isEmpty()) {
-                this.historyManager.add(this.getTaskById(Integer.parseInt(id)));
-                this.historyManager.add(this.getEpicById(Integer.parseInt(id)));
-                this.historyManager.add(this.getSubtaskById(Integer.parseInt(id)));
+                this.historyManager.add(this.tasks.get(Integer.parseInt(id)));
+                this.historyManager.add(this.epics.get(Integer.parseInt(id)));
+                this.historyManager.add(this.subtasks.get(Integer.parseInt(id)));
             }
         }
     }
@@ -317,6 +235,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 break;
             case SUBTASK:
                 task = new Subtask(splitValue[2], splitValue[4], Integer.parseInt(splitValue[5]));
+                task.setStatus(Status.valueOf(splitValue[3]));
                 break;
         }
         if (task != null) {
