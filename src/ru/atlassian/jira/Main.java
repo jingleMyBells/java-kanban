@@ -18,7 +18,7 @@ public class Main {
     }
 
     public static void fileTest() {
-        FileBackedTasksManager fileManager = Managers.getFileBacked("tasks.csv", "history.csv");
+        FileBackedTasksManager fileManager = Managers.getFileBacked("tasks.csv");
 
         Task newTask = new Task("Название без запятых", "Записать задачу в файл", Status.NEW);
         fileManager.createTask(newTask);
