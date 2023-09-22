@@ -32,9 +32,11 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void updateTask(Task task) {
         Task taskForUpdate = this.tasks.get(task.getId());
-        taskForUpdate.setTitle(task.getTitle());
-        taskForUpdate.setDescription(task.getDescription());
-        taskForUpdate.setStatus(task.getStatus());
+        if (taskForUpdate != null) {
+            taskForUpdate.setTitle(task.getTitle());
+            taskForUpdate.setDescription(task.getDescription());
+            taskForUpdate.setStatus(task.getStatus());
+        }
     }
 
     @Override
@@ -72,8 +74,11 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void updateEpic(Epic epic) {
         Epic epicForUpdate = this.epics.get(epic.getId());
-        epicForUpdate.setTitle(epic.getTitle());
-        epicForUpdate.setDescription(epic.getDescription());
+        if (epicForUpdate != null) {
+            epicForUpdate.setTitle(epic.getTitle());
+            epicForUpdate.setDescription(epic.getDescription());
+        }
+
     }
 
     @Override
@@ -141,11 +146,13 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void updateSubtask(Subtask subtask) {
         Subtask subtaskForUpdate = this.subtasks.get(subtask.getId());
-        subtaskForUpdate.setTitle(subtask.getTitle());
-        subtaskForUpdate.setDescription(subtask.getDescription());
-        subtaskForUpdate.setStatus(subtask.getStatus());
-        Epic epic = this.epics.get(subtask.getEpicId());
-        this.checkAndModifyEpicStatus(epic);
+        if (subtaskForUpdate != null) {
+            subtaskForUpdate.setTitle(subtask.getTitle());
+            subtaskForUpdate.setDescription(subtask.getDescription());
+            subtaskForUpdate.setStatus(subtask.getStatus());
+            Epic epic = this.epics.get(subtask.getEpicId());
+            this.checkAndModifyEpicStatus(epic);
+        }
     }
 
     @Override
@@ -174,10 +181,15 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteSubtaskById(int id) {
-        Epic epic = this.epics.get(this.subtasks.get(id).getEpicId());
-        epic.removeSubtask(this.subtasks.remove(id));
-        this.checkAndModifyEpicStatus(epic);
-        this.historyManager.remove(id);
+        Subtask subtaskToDelete = this.subtasks.get(id);
+        if (subtaskToDelete != null) {
+            Epic epic = this.epics.get(subtaskToDelete.getEpicId());
+            epic.removeSubtask(this.subtasks.remove(id));
+            this.checkAndModifyEpicStatus(epic);
+            this.subtasks.remove(id);
+            this.historyManager.remove(id);
+        }
+
     }
 
     @Override
