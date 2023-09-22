@@ -135,7 +135,6 @@ public class InMemoryTaskManager implements TaskManager {
         if (epic != null) {
             subtask.setId(createNewTaskId());
             this.subtasks.put(subtask.getId(), subtask);
-
             epic.addSubtask(subtask);
             this.checkAndModifyEpicStatus(epic);
         } else {
