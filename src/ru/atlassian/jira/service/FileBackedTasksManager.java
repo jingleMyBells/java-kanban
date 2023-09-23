@@ -1,6 +1,5 @@
 package ru.atlassian.jira.service;
 
-import com.sun.nio.sctp.SendFailedNotification;
 import ru.atlassian.jira.exceptions.ManagerEmptyStorageException;
 import ru.atlassian.jira.exceptions.ManagerReadException;
 import ru.atlassian.jira.model.Epic;
@@ -135,16 +134,19 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
     private void saveHistory() throws ManagerSaveException {
         List<Task> history = this.getHistory();
-        List<String> taskIds = new ArrayList<>();
-        for (Task task : history) {
-            taskIds.add(String.valueOf(task.getId()));
+        if (!history.isEmpty()) {
+            List<String> taskIds = new ArrayList<>();
+            for (Task task : history) {
+                taskIds.add(String.valueOf(task.getId()));
+            }
+            String result = String.join(",", taskIds);
+            try (FileWriter writer = new FileWriter(filename, StandardCharsets.UTF_8, true)) {
+                writer.write(result);
+            } catch (IOException exception) {
+                throw new ManagerSaveException("Ошибка записи истории на диск");
+            }
         }
-        String result = String.join(",", taskIds);
-        try (FileWriter writer = new FileWriter(filename, StandardCharsets.UTF_8, true)) {
-            writer.write(result);
-        } catch (IOException exception) {
-            throw new ManagerSaveException("Ошибка записи истории на диск");
-        }
+
     }
 
 
@@ -165,7 +167,24 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         }
 
         if (!tasksToRestore.isEmpty()) {
-            for (int i = 1; i < (tasksToRestore.size() - 1); i++) {
+
+            String lastString = tasksToRestore.get(tasksToRestore.size() - 1);
+            String[] lastStringSplitted = lastString.split(",");
+
+            int lastIndex;
+            if (lastStringSplitted.length > 1) {
+                try {
+                    Integer.parseInt(lastStringSplitted[1]);
+                    lastIndex = tasksToRestore.size() - 1;
+
+                } catch (NumberFormatException e) {
+                    lastIndex = tasksToRestore.size();
+                }
+            } else {
+                lastIndex = tasksToRestore.size() - 1;
+            }
+
+            for (int i = 1; i < lastIndex; i++) {
                 Task task = getTaskFromString(tasksToRestore.get(i));
                 switch (TaskType.valueOf(task.getClass().getSimpleName().toUpperCase())) {
                     case TASK:
@@ -189,9 +208,13 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             String[] taskIds = String.valueOf(tasksToRestore.get(tasksToRestore.size() - 1)).split(",");
             for (String id : taskIds) {
                 if (!id.isEmpty()) {
-                    this.historyManager.add(this.tasks.get(Integer.parseInt(id)));
-                    this.historyManager.add(this.epics.get(Integer.parseInt(id)));
-                    this.historyManager.add(this.subtasks.get(Integer.parseInt(id)));
+                    try {
+                        this.historyManager.add(this.tasks.get(Integer.parseInt(id)));
+                        this.historyManager.add(this.epics.get(Integer.parseInt(id)));
+                        this.historyManager.add(this.subtasks.get(Integer.parseInt(id)));
+                    } catch (NumberFormatException exception) {
+                        System.out.println("Строки с историей нет в исходном файле");
+                    }
                 }
             }
         }

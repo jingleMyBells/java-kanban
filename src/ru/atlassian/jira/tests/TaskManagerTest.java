@@ -18,9 +18,13 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
     public static TaskManager taskManager;
 
+    public TaskManager getProperManager() {
+        return Managers.getDefault();
+    }
+
     @BeforeEach
     public void createManager() {
-        taskManager = Managers.getDefault();
+        taskManager = getProperManager();
     }
 
 
