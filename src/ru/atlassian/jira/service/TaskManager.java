@@ -1,6 +1,5 @@
 package ru.atlassian.jira.service;
 
-import java.util.Collection;
 import java.util.List;
 import ru.atlassian.jira.model.Task;
 import ru.atlassian.jira.model.Epic;
@@ -12,7 +11,7 @@ public interface TaskManager {
 
     void updateTask(Task task);
 
-    Collection<Task> getAllTasks();
+    List<Task> getAllTasks();
 
     void deleteAllTasks();
 
@@ -24,7 +23,7 @@ public interface TaskManager {
 
     void updateEpic(Epic epic);
 
-    Collection<Epic> getAllEpics();
+    List<Epic> getAllEpics();
 
     void deleteAllEpics();
 
@@ -38,7 +37,7 @@ public interface TaskManager {
 
     void updateSubtask(Subtask subtask);
 
-    Collection<Subtask> getAllSubtasks();
+    List<Subtask> getAllSubtasks();
 
     void deleteAllSubtasks();
 
@@ -47,4 +46,7 @@ public interface TaskManager {
     void deleteSubtaskById(int id);
 
     List<Task> getHistory();
+
+    List<Task> getPrioritizedTasks();
+
 }

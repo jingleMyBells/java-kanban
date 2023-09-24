@@ -1,6 +1,5 @@
 package ru.atlassian.jira.service;
 
-import com.sun.nio.sctp.SendFailedNotification;
 import ru.atlassian.jira.exceptions.ManagerEmptyStorageException;
 import ru.atlassian.jira.exceptions.ManagerReadException;
 import ru.atlassian.jira.model.Epic;
@@ -12,6 +11,7 @@ import ru.atlassian.jira.exceptions.ManagerSaveException;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -123,7 +123,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     private void save() throws ManagerSaveException {
         Map<Integer, Task> allTasks = getAllStoredObjects();
         try (FileWriter writer = new FileWriter(filename, StandardCharsets.UTF_8)) {
-            writer.write("id,type,title,status,description,epicId\n");
+            writer.write("id,type,title,status,description,epicId,duration,startTime\n");
             for (Map.Entry<Integer, Task> entry : allTasks.entrySet()) {
                 writer.write(entry.getValue().toString() + "\n");
             }
@@ -135,16 +135,19 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
     private void saveHistory() throws ManagerSaveException {
         List<Task> history = this.getHistory();
-        List<String> taskIds = new ArrayList<>();
-        for (Task task : history) {
-            taskIds.add(String.valueOf(task.getId()));
+        if (!history.isEmpty()) {
+            List<String> taskIds = new ArrayList<>();
+            for (Task task : history) {
+                taskIds.add(String.valueOf(task.getId()));
+            }
+            String result = String.join(",", taskIds);
+            try (FileWriter writer = new FileWriter(filename, StandardCharsets.UTF_8, true)) {
+                writer.write(result);
+            } catch (IOException exception) {
+                throw new ManagerSaveException("Ошибка записи истории на диск");
+            }
         }
-        String result = String.join(",", taskIds);
-        try (FileWriter writer = new FileWriter(filename, StandardCharsets.UTF_8, true)) {
-            writer.write(result);
-        } catch (IOException exception) {
-            throw new ManagerSaveException("Ошибка записи истории на диск");
-        }
+
     }
 
 
@@ -165,7 +168,24 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         }
 
         if (!tasksToRestore.isEmpty()) {
-            for (int i = 1; i < (tasksToRestore.size() - 1); i++) {
+
+            String lastString = tasksToRestore.get(tasksToRestore.size() - 1);
+            String[] lastStringSplitted = lastString.split(",");
+
+            int lastIndex;
+            if (lastStringSplitted.length > 1) {
+                try {
+                    Integer.parseInt(lastStringSplitted[1]);
+                    lastIndex = tasksToRestore.size() - 1;
+
+                } catch (NumberFormatException e) {
+                    lastIndex = tasksToRestore.size();
+                }
+            } else {
+                lastIndex = tasksToRestore.size() - 1;
+            }
+
+            for (int i = 1; i < lastIndex; i++) {
                 Task task = getTaskFromString(tasksToRestore.get(i));
                 switch (TaskType.valueOf(task.getClass().getSimpleName().toUpperCase())) {
                     case TASK:
@@ -189,9 +209,13 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             String[] taskIds = String.valueOf(tasksToRestore.get(tasksToRestore.size() - 1)).split(",");
             for (String id : taskIds) {
                 if (!id.isEmpty()) {
-                    this.historyManager.add(this.tasks.get(Integer.parseInt(id)));
-                    this.historyManager.add(this.epics.get(Integer.parseInt(id)));
-                    this.historyManager.add(this.subtasks.get(Integer.parseInt(id)));
+                    try {
+                        this.historyManager.add(this.tasks.get(Integer.parseInt(id)));
+                        this.historyManager.add(this.epics.get(Integer.parseInt(id)));
+                        this.historyManager.add(this.subtasks.get(Integer.parseInt(id)));
+                    } catch (NumberFormatException exception) {
+                        System.out.println("Строки с историей нет в исходном файле");
+                    }
                 }
             }
         }
@@ -215,21 +239,41 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         return allTasks;
     }
 
-
     private Task getTaskFromString(String value) {
         String[] splitValue = value.split(",");
         Task task = null;
         switch (TaskType.valueOf(splitValue[1].toUpperCase())) {
             case TASK:
-                task = new Task(splitValue[2], splitValue[4], Status.valueOf(splitValue[3]));
+                if (splitValue[5].equals("0")) {
+                    task = new Task(splitValue[2], splitValue[4], Status.valueOf(splitValue[3]));
+                } else {
+                    task = new Task(
+                            splitValue[2],
+                            splitValue[4],
+                            Status.valueOf(splitValue[3]),
+                            Integer.parseInt(splitValue[5]),
+                            LocalDateTime.parse(splitValue[6], Task.FORMATTER)
+                    );
+                }
                 break;
             case EPIC:
                 task = new Epic(splitValue[2], splitValue[4]);
                 task.setStatus(Status.valueOf(splitValue[3]));
                 break;
             case SUBTASK:
-                task = new Subtask(splitValue[2], splitValue[4], Integer.parseInt(splitValue[5]));
-                task.setStatus(Status.valueOf(splitValue[3]));
+                if (splitValue[6].equals("0")) {
+                    task = new Subtask(splitValue[2], splitValue[4], Integer.parseInt(splitValue[5]));
+                    task.setStatus(Status.valueOf(splitValue[3]));
+                } else {
+                    task = new Subtask(
+                            splitValue[2],
+                            splitValue[4],
+                            Integer.parseInt(splitValue[5]),
+                            Integer.parseInt(splitValue[6]),
+                            LocalDateTime.parse(splitValue[7], Task.FORMATTER)
+                    );
+                    task.setStatus(Status.valueOf(splitValue[3]));
+                }
                 break;
         }
         if (task != null) {

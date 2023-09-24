@@ -1,10 +1,17 @@
 package ru.atlassian.jira.model;
 
+import java.time.LocalDateTime;
+
 public class Subtask extends Task {
     private int epicId;
 
     public Subtask(String title, String description, int epicId) {
         super(title, description, Status.NEW);
+        this.epicId = epicId;
+    }
+
+    public Subtask(String title, String description, int epicId, int duration, LocalDateTime startTime) {
+        super(title, description, Status.NEW, duration, startTime);
         this.epicId = epicId;
     }
 
@@ -26,9 +33,17 @@ public class Subtask extends Task {
 
     @Override
     public String toString() {
+        String taskDuration = "0";
+        if (getDuration().isPresent()) {
+            taskDuration = String.valueOf(duration);
+        }
+        String dateTime = "0";
+        if (getStartTime().isPresent()) {
+            dateTime = getStartTime().get().format(FORMATTER);
+        }
         return String.join(
                 ",", String.valueOf(id), "Subtask",
-                title, status.toString(), description, String.valueOf(epicId)
+                title, status.toString(), description, String.valueOf(epicId), taskDuration, dateTime
         );
     }
 }
