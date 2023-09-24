@@ -2,7 +2,6 @@ package ru.atlassian.jira.tests;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.atlassian.jira.model.Epic;
 import ru.atlassian.jira.model.Status;
 import ru.atlassian.jira.model.Task;
 import ru.atlassian.jira.service.Managers;
@@ -15,7 +14,6 @@ import static org.junit.jupiter.api.Assertions.*;
 public class InMemoryHistoryManagerTest {
 
     public static TaskManager taskManager;
-    public static Epic epicToTest;
 
     @BeforeEach
     public void setupForEach() {

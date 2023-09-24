@@ -22,7 +22,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 
-public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksManager>{
+public class FileBackedTasksManagerTest extends TaskManagerTest{
 
 
     @Override

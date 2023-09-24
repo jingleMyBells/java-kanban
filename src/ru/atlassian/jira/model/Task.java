@@ -73,7 +73,7 @@ public class Task implements Comparable<Task>{
     }
 
     public Optional<Integer> getDuration() {
-        return Optional.ofNullable(this.duration);
+        return Optional.of(this.duration);
     }
 
     public void setDuration(Integer duration) {

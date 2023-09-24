@@ -1,6 +1,5 @@
 package ru.atlassian.jira.service;
 
-import java.util.Collection;
 import java.util.List;
 import ru.atlassian.jira.model.Task;
 import ru.atlassian.jira.model.Epic;

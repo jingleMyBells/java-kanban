@@ -16,7 +16,7 @@ import java.util.List;
 
 
 
-public abstract class TaskManagerTest<T extends TaskManager> {
+public abstract class TaskManagerTest {
 
     public static TaskManager taskManager;
 
