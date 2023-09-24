@@ -2,6 +2,8 @@ package ru.atlassian.jira.tests;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.engine.config.EnumConfigurationParameterConverter;
+import ru.atlassian.jira.exceptions.ManagerInvalidTimePropertiesException;
 import ru.atlassian.jira.service.Managers;
 import ru.atlassian.jira.service.TaskManager;
 import ru.atlassian.jira.model.Task;
@@ -10,6 +12,8 @@ import ru.atlassian.jira.model.Subtask;
 import ru.atlassian.jira.model.Status;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -851,4 +855,204 @@ public abstract class TaskManagerTest<T extends TaskManager> {
                 "При удалении несуществующего эпика по id размер списка эпиков в менеджере изменился"
         );
     }
+
+    @Test
+    public void checksTaskWithTimeCreation() {
+        LocalDateTime estimatedStartTime = LocalDateTime.of(2023, 9, 24, 23, 23);
+        int estimatedDuration = 10;
+
+        taskManager.createTask(
+                new Task(
+                        "Title",
+                        "Descr",
+                        Status.NEW,
+                        estimatedDuration,
+                        estimatedStartTime
+                )
+        );
+
+        LocalDateTime estimatedEndTime = LocalDateTime.of(2023, 9, 24, 23, 33);
+
+        Task task = taskManager.getTaskById(1);
+
+        assertTrue(
+                task.getStartTime().isPresent(),
+                "При создании задачи с временными параметрами время старта не вернулось"
+        );
+
+        assertTrue(
+                task.getEndTime().isPresent(),
+                "При создании задачи с временными параметрами время завершения не вернулось"
+        );
+
+        assertEquals(
+                estimatedStartTime.compareTo(task.getEndTime().get()),
+                0,
+                "При создании задачи с временными параметрами время старта не совпало с ожидаемым"
+        );
+
+
+        assertEquals(
+                estimatedEndTime.compareTo(task.getEndTime().get()),
+                0,
+                "При создании задачи с временными параметрами время завершения не совпало с ожидаемым"
+        );
+
+        assertTrue(
+                task.getDuration().isPresent(),
+                "При создании задачи с временными параметрами длительность не вернулась"
+        );
+
+        assertEquals(
+                task.getDuration().get(),
+                estimatedDuration,
+                "При создании задачи с временными параметрами длительность не совпала с ожидаемым"
+        );
+
+    }
+
+    @Test
+    public void checksSubTaskWithTimeCreation() {
+        LocalDateTime estimatedStartTime = LocalDateTime.of(2023, 9, 24, 23, 23);
+        int estimatedDuration = 10;
+
+        taskManager.createEpic(new Epic("Title", "descr"));
+
+        taskManager.createSubtask(
+                new Subtask(
+                        "Title",
+                        "Descr",
+                        1,
+                        estimatedDuration,
+                        estimatedStartTime
+                )
+        );
+
+        LocalDateTime estimatedEndTime = LocalDateTime.of(2023, 9, 24, 23, 33);
+
+        Subtask task = taskManager.getSubtaskById(2);
+
+        assertTrue(
+                task.getStartTime().isPresent(),
+                "При создании задачи с временными параметрами время старта не вернулось"
+        );
+
+        assertTrue(
+                task.getEndTime().isPresent(),
+                "При создании задачи с временными параметрами время завершения не вернулось"
+        );
+
+        assertEquals(
+                estimatedStartTime.compareTo(task.getStartTime().get()),
+                0,
+                "При создании задачи с временными параметрами время старта не совпало с ожидаемым"
+        );
+
+
+        assertEquals(
+                estimatedEndTime.compareTo(task.getEndTime().get()),
+                0,
+                "При создании задачи с временными параметрами время завершения не совпало с ожидаемым"
+        );
+
+        assertTrue(
+                task.getDuration().isPresent(),
+                "При создании задачи с временными параметрами длительность не вернулась"
+        );
+
+        assertEquals(
+                task.getDuration().get(),
+                estimatedDuration,
+                "При создании задачи с временными параметрами длительность не совпала с ожидаемым"
+        );
+
+    }
+
+    @Test
+    public void checksEpicTimePropertiesCalculation() {
+        LocalDateTime startTime = LocalDateTime.of(2023, 9, 24, 23, 33);
+        LocalDateTime startTime2 = LocalDateTime.of(2023, 9, 24, 23, 53);
+        int duration = 10;
+        taskManager.createEpic(new Epic("fgdfgh", "yfgjf"));
+        taskManager.createSubtask(new Subtask("fgdfh", "fhfg", 1, duration, startTime));
+        taskManager.createSubtask(new Subtask("fgdfh", "fhfg", 1, duration, startTime2));
+        taskManager.createSubtask(new Subtask("fgdfh", "fhfg", 1));
+
+        LocalDateTime estimatedEndTime = LocalDateTime.of(2023, 9, 25, 0, 3);
+
+        Epic epic = taskManager.getEpicById(1);
+
+        assertTrue(
+                epic.getStartTime().isPresent(),
+                "При наполнении эпика задачами время старта эпика не возвращается"
+        );
+
+        assertTrue(
+                epic.getEndTime().isPresent(),
+                "При наполнении эпика задачами время завершения эпика не возвращается"
+        );
+
+        assertTrue(
+                epic.getDuration().isPresent(),
+                "При наполнении эпика задачами длительность эпика не возвращается"
+        );
+
+        assertEquals(
+                epic.getStartTime().get().compareTo(startTime),
+                0,
+                "При наполнении эпика задачами дата старта отличается от ожидаемого"
+
+        );
+
+        assertEquals(
+                epic.getEndTime().get().compareTo(estimatedEndTime),
+                0,
+                "При наполнении эпика задачами дата завершения отличается от ожидаемого"
+
+        );
+
+        assertEquals(
+                epic.getDuration().get(),
+                20,
+                "При наполнении эпика задачами дата завершения отличается от ожидаемого"
+
+        );
+
+    }
+
+    @Test
+    public void checksTasksIntersection() {
+        LocalDateTime time1 = LocalDateTime.of(2023, 9, 24, 23, 33);
+        LocalDateTime time2 = LocalDateTime.of(2023, 9, 24, 23, 43);
+        LocalDateTime time3 = LocalDateTime.of(2023, 9, 24, 23, 53);
+        Task task1 = new Task("fgsfh", "sdfsgdf", Status.NEW, 15, time1);
+        Task task2 = new Task("fgsfh", "sdfsgdf", Status.NEW, 10, time2);
+        Task task3 = new Task("fgsfh", "sdfsgdf", Status.NEW, 10, time3);
+
+        taskManager.createTask(task1);
+
+        assertThrows(
+                ManagerInvalidTimePropertiesException.class,
+                () -> taskManager.createTask(task2),
+                "Не выбрасывается исключение при попытке создать пересекающиеся задачи"
+        );
+
+        taskManager.createTask(task3);
+
+        assertNotNull(
+                taskManager.getTaskById(2),
+                "Не создается задача, проходящая проверку на пересечения"
+        );
+
+        Task taskToUpdate = taskManager.getTaskById(1);
+        taskToUpdate.setDuration(100);
+
+        assertThrows(
+                ManagerInvalidTimePropertiesException.class,
+                () -> taskManager.updateTask(taskToUpdate),
+                "Не выбрасывается исключение при обновлении задачи и конфликте пересечений"
+        );
+
+    }
+
 }
