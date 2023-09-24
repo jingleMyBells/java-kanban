@@ -2,7 +2,6 @@ package ru.atlassian.jira.tests;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.engine.config.EnumConfigurationParameterConverter;
 import ru.atlassian.jira.exceptions.ManagerInvalidTimePropertiesException;
 import ru.atlassian.jira.service.Managers;
 import ru.atlassian.jira.service.TaskManager;
@@ -12,7 +11,6 @@ import ru.atlassian.jira.model.Subtask;
 import ru.atlassian.jira.model.Status;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -886,7 +884,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         );
 
         assertEquals(
-                estimatedStartTime.compareTo(task.getEndTime().get()),
+                estimatedStartTime.compareTo(task.getStartTime().get()),
                 0,
                 "При создании задачи с временными параметрами время старта не совпало с ожидаемым"
         );
@@ -1051,6 +1049,25 @@ public abstract class TaskManagerTest<T extends TaskManager> {
                 ManagerInvalidTimePropertiesException.class,
                 () -> taskManager.updateTask(taskToUpdate),
                 "Не выбрасывается исключение при обновлении задачи и конфликте пересечений"
+        );
+
+    }
+
+    @Test
+    public void checksPrioritizedList() {
+        LocalDateTime time1 = LocalDateTime.of(2023, 9, 24, 23, 33);
+        LocalDateTime time2 = LocalDateTime.of(2023, 9, 24, 23, 53);
+        LocalDateTime time3 = LocalDateTime.of(2023, 9, 24, 23, 13);
+        taskManager.createTask(new Task("fgsfh", "sdfsgdf", Status.NEW, 10, time1));
+        taskManager.createTask(new Task("fgsfh", "sdfsgdf", Status.NEW, 10, time2));
+        taskManager.createTask(new Task("fgsfh", "sdfsgdf", Status.NEW, 10, time3));
+
+        Task task = taskManager.getPrioritizedTasks().get(0);
+
+        assertEquals(
+                task.getId(),
+                3,
+                "В списке по приоритетам ID наиболее приоритетной задачи отличается от ожидаемого"
         );
 
     }
