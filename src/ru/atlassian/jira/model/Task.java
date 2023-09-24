@@ -26,13 +26,13 @@ public class Task implements Comparable<Task>{
             String title,
             String description,
             Status status,
-            Duration duration,
+            int duration,
             LocalDateTime startTime
     ) {
         this.title = title;
         this.description = description;
         this.status = status;
-        this.duration = duration;
+        this.duration = Duration.ofMinutes(duration);
         this.startTime = startTime;
     }
 
@@ -107,13 +107,6 @@ public class Task implements Comparable<Task>{
         return Objects.hash(id, title, description, status);
     }
 
-//    @Override
-//    public String toString() {
-//        return String.join(
-//                ",", String.valueOf(id), "Task",
-//                title, status.toString(), description
-//        );
-//    }
     @Override
     public String toString() {
         String taskDuration = "0";

@@ -22,7 +22,7 @@ public class Main {
 
     public static void testPrioritized() {
         TaskManager testManager = Managers.getDefault();
-        Duration duration = Duration.ofMinutes(10);
+        int duration = 10;
         LocalDateTime start1 = LocalDateTime.of(2023, 1, 1, 1, 0, 0);
         LocalDateTime start2 = LocalDateTime.of(2023, 2, 1, 1, 0, 0);
         LocalDateTime start3 = LocalDateTime.of(2023, 3, 1, 1, 0, 0);

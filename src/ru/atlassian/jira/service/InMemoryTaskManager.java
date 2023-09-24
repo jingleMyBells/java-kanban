@@ -1,10 +1,12 @@
 package ru.atlassian.jira.service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import ru.atlassian.jira.model.Task;
 import ru.atlassian.jira.model.Epic;
 import ru.atlassian.jira.model.Subtask;
 import ru.atlassian.jira.model.Status;
+import ru.atlassian.jira.exceptions.ManagerInvalidTimePropertiesException;
 
 public class InMemoryTaskManager implements TaskManager {
 
@@ -24,15 +26,27 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void createTask(Task task) {
+    public void createTask(Task task) throws ManagerInvalidTimePropertiesException {
+        Optional<Task> intersectedTask = taskIntersections(task);
+        if (intersectedTask.isPresent()) {
+            throw new ManagerInvalidTimePropertiesException(
+                    "Задача пересекается по времени с задачей номер" + intersectedTask.get().getId()
+            );
+        }
         task.setId(createNewTaskId());
         this.tasks.put(task.getId(), task);
     }
 
     @Override
-    public void updateTask(Task task) {
+    public void updateTask(Task task) throws ManagerInvalidTimePropertiesException {
         Task taskForUpdate = this.tasks.get(task.getId());
         if (taskForUpdate != null) {
+            Optional<Task> intersectedTask = taskIntersections(task);
+            if (intersectedTask.isPresent()) {
+                throw new ManagerInvalidTimePropertiesException(
+                        "Задача пересекается по времени с задачей номер" + intersectedTask.get().getId()
+                );
+            }
             taskForUpdate.setTitle(task.getTitle());
             taskForUpdate.setDescription(task.getDescription());
             taskForUpdate.setStatus(task.getStatus());
@@ -130,7 +144,13 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void createSubtask(Subtask subtask) {
+    public void createSubtask(Subtask subtask) throws ManagerInvalidTimePropertiesException {
+        Optional<Task> intersectedTask = taskIntersections(subtask);
+        if (intersectedTask.isPresent()) {
+            throw new ManagerInvalidTimePropertiesException(
+                    "Задача пересекается по времени с задачей номер" + intersectedTask.get().getId()
+            );
+        }
         Epic epic = this.epics.get(subtask.getEpicId());
         if (epic != null) {
             subtask.setId(createNewTaskId());
@@ -143,9 +163,15 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void updateSubtask(Subtask subtask) {
+    public void updateSubtask(Subtask subtask) throws ManagerInvalidTimePropertiesException {
         Subtask subtaskForUpdate = this.subtasks.get(subtask.getId());
         if (subtaskForUpdate != null) {
+            Optional<Task> intersectedTask = taskIntersections(subtask);
+            if (intersectedTask.isPresent()) {
+                throw new ManagerInvalidTimePropertiesException(
+                        "Задача пересекается по времени с задачей номер" + intersectedTask.get().getId()
+                );
+            }
             subtaskForUpdate.setTitle(subtask.getTitle());
             subtaskForUpdate.setDescription(subtask.getDescription());
             subtaskForUpdate.setStatus(subtask.getStatus());
@@ -235,11 +261,30 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
-    private List<Task> getAllStoredTasks() {
+    protected List<Task> getAllStoredTasks() {
         Map<Integer, Task> allTasks = new HashMap<>();
         allTasks.putAll(this.tasks);
         allTasks.putAll(this.subtasks);
         return new ArrayList<>(allTasks.values());
+    }
+
+    protected Optional<Task> taskIntersections(Task taskToValidate) {
+        if (taskToValidate.getStartTime().isPresent() && taskToValidate.getEndTime().isPresent()) {
+            final LocalDateTime validatedStartTime = taskToValidate.getStartTime().get();
+            final LocalDateTime validatedEndTime = taskToValidate.getEndTime().get();
+            List<Task> tasks = getAllStoredTasks();
+            for (Task task : tasks) {
+                if (task.getStartTime().isEmpty() || task.getEndTime().isEmpty()) {
+                    continue;
+                }
+                if (validatedStartTime.isAfter(task.getEndTime().get())
+                        || validatedEndTime.isBefore(task.getStartTime().get())) {
+                    continue;
+                }
+                return Optional.of(task);
+            }
+        }
+        return Optional.empty();
     }
 
 }
