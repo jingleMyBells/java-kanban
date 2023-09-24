@@ -1,18 +1,42 @@
 package ru.atlassian.jira.model;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
+import java.util.Optional;
 
-public class Task {
+public class Task implements Comparable<Task>{
     protected int id;
     protected String title;
     protected String description;
     protected Status status;
+    protected Duration duration;
+    protected LocalDateTime startTime;
+
+    public static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy:HH.mm");
 
     public Task(String title, String description, Status status) {
         this.title = title;
         this.description = description;
         this.status = status;
     }
+
+    public Task(
+            String title,
+            String description,
+            Status status,
+            Duration duration,
+            LocalDateTime startTime
+    ) {
+        this.title = title;
+        this.description = description;
+        this.status = status;
+        this.duration = duration;
+        this.startTime = startTime;
+    }
+
+
 
     public int getId() {
         return id;
@@ -47,6 +71,29 @@ public class Task {
         this.status = status;
     }
 
+    public Optional<Duration> getDuration() {
+        return Optional.ofNullable(this.duration);
+    }
+
+    public void setDuration(Duration duration) {
+        this.duration = duration;
+    }
+
+    public Optional<LocalDateTime> getStartTime() {
+        return Optional.ofNullable(this.startTime);
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public Optional<LocalDateTime> getEndTime() {
+        if (getStartTime().isPresent()) {
+            return Optional.of(getStartTime().get().plus(duration));
+        }
+        return Optional.empty();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -60,11 +107,47 @@ public class Task {
         return Objects.hash(id, title, description, status);
     }
 
+//    @Override
+//    public String toString() {
+//        return String.join(
+//                ",", String.valueOf(id), "Task",
+//                title, status.toString(), description
+//        );
+//    }
     @Override
     public String toString() {
+        String taskDuration = "0";
+        if (getDuration().isPresent()) {
+            taskDuration = String.valueOf(getDuration().get().toMinutes());
+        }
+        String dateTime = "0";
+        if (getStartTime().isPresent()) {
+            dateTime = getStartTime().get().format(FORMATTER);
+        }
         return String.join(
                 ",", String.valueOf(id), "Task",
-                title, status.toString(), description
+                title, status.toString(), description, taskDuration, dateTime
         );
     }
+
+    @Override
+    public int compareTo(Task task) {
+        if (this.getStartTime().isPresent() && task.getStartTime().isPresent()) {
+            LocalDateTime currentTaskStart = this.getStartTime().get();
+            LocalDateTime anotherTaskStart = task.getStartTime().get();
+            if (anotherTaskStart.isBefore(currentTaskStart)) {
+                return 1;
+            } else if (anotherTaskStart.isAfter(currentTaskStart)) {
+                return -1;
+            }
+            return 0;
+        } else if (this.getStartTime().isPresent() && task.getStartTime().isEmpty()) {
+            return -1;
+        } else if (this.getStartTime().isEmpty() && task.getStartTime().isPresent()) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+
 }

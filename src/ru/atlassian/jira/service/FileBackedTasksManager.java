@@ -11,6 +11,8 @@ import ru.atlassian.jira.exceptions.ManagerSaveException;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -119,18 +121,30 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         save();
     }
 
-    private void save() throws ManagerSaveException {
-        Map<Integer, Task> allTasks = getAllStoredObjects();
-        try (FileWriter writer = new FileWriter(filename, StandardCharsets.UTF_8)) {
-            writer.write("id,type,title,status,description,epicId\n");
-            for (Map.Entry<Integer, Task> entry : allTasks.entrySet()) {
-                writer.write(entry.getValue().toString() + "\n");
-            }
-        } catch (IOException exception) {
-            throw new ManagerSaveException("Ошибка записи задач на диск");
+//    private void save() throws ManagerSaveException {
+//        Map<Integer, Task> allTasks = getAllStoredObjects();
+//        try (FileWriter writer = new FileWriter(filename, StandardCharsets.UTF_8)) {
+//            writer.write("id,type,title,status,description,epicId\n");
+//            for (Map.Entry<Integer, Task> entry : allTasks.entrySet()) {
+//                writer.write(entry.getValue().toString() + "\n");
+//            }
+//        } catch (IOException exception) {
+//            throw new ManagerSaveException("Ошибка записи задач на диск");
+//        }
+//        saveHistory();
+//    }
+private void save() throws ManagerSaveException {
+    Map<Integer, Task> allTasks = getAllStoredObjects();
+    try (FileWriter writer = new FileWriter(filename, StandardCharsets.UTF_8)) {
+        writer.write("id,type,title,status,description,epicId,duration,startTime\n");
+        for (Map.Entry<Integer, Task> entry : allTasks.entrySet()) {
+            writer.write(entry.getValue().toString() + "\n");
         }
-        saveHistory();
+    } catch (IOException exception) {
+        throw new ManagerSaveException("Ошибка записи задач на диск");
     }
+    saveHistory();
+}
 
     private void saveHistory() throws ManagerSaveException {
         List<Task> history = this.getHistory();
@@ -239,20 +253,62 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
 
+//    private Task getTaskFromString(String value) {
+//        String[] splitValue = value.split(",");
+//        Task task = null;
+//        switch (TaskType.valueOf(splitValue[1].toUpperCase())) {
+//            case TASK:
+//                task = new Task(splitValue[2], splitValue[4], Status.valueOf(splitValue[3]));
+//                break;
+//            case EPIC:
+//                task = new Epic(splitValue[2], splitValue[4]);
+//                task.setStatus(Status.valueOf(splitValue[3]));
+//                break;
+//            case SUBTASK:
+//                task = new Subtask(splitValue[2], splitValue[4], Integer.parseInt(splitValue[5]));
+//                task.setStatus(Status.valueOf(splitValue[3]));
+//                break;
+//        }
+//        if (task != null) {
+//            task.setId(Integer.parseInt(splitValue[0]));
+//        }
+//        return task;
+//    }
     private Task getTaskFromString(String value) {
         String[] splitValue = value.split(",");
         Task task = null;
         switch (TaskType.valueOf(splitValue[1].toUpperCase())) {
             case TASK:
-                task = new Task(splitValue[2], splitValue[4], Status.valueOf(splitValue[3]));
+                if (splitValue[5].equals("0")) {
+                    task = new Task(splitValue[2], splitValue[4], Status.valueOf(splitValue[3]));
+                } else {
+                    task = new Task(
+                            splitValue[2],
+                            splitValue[4],
+                            Status.valueOf(splitValue[3]),
+                            Duration.ofMinutes(Long.parseLong(splitValue[5])),
+                            LocalDateTime.parse(splitValue[6], Task.FORMATTER)
+                    );
+                }
                 break;
             case EPIC:
                 task = new Epic(splitValue[2], splitValue[4]);
                 task.setStatus(Status.valueOf(splitValue[3]));
                 break;
             case SUBTASK:
-                task = new Subtask(splitValue[2], splitValue[4], Integer.parseInt(splitValue[5]));
-                task.setStatus(Status.valueOf(splitValue[3]));
+                if (splitValue[6].equals("0")) {
+                    task = new Subtask(splitValue[2], splitValue[4], Integer.parseInt(splitValue[5]));
+                    task.setStatus(Status.valueOf(splitValue[3]));
+                } else {
+                    task = new Subtask(
+                            splitValue[2],
+                            splitValue[4],
+                            Integer.parseInt(splitValue[5]),
+                            Duration.ofMinutes(Long.parseLong(splitValue[6])),
+                            LocalDateTime.parse(splitValue[7], Task.FORMATTER)
+                    );
+                    task.setStatus(Status.valueOf(splitValue[3]));
+                }
                 break;
         }
         if (task != null) {

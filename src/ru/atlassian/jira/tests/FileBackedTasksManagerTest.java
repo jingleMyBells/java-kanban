@@ -1,11 +1,8 @@
 package ru.atlassian.jira.tests;
 
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.atlassian.jira.exceptions.ManagerReadException;
-import ru.atlassian.jira.model.Epic;
 import ru.atlassian.jira.model.Status;
 import ru.atlassian.jira.model.Task;
 import ru.atlassian.jira.service.FileBackedTasksManager;
@@ -60,13 +57,13 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
 
         assertEquals(
                 lines.get(0),
-                "id,type,title,status,description,epicId",
+                "id,type,title,status,description,epicId,duration,startTime",
                 "После сохранения задач в файл строка заголовков отличается от ожидаемой"
         );
 
         assertEquals(
                 lines.get(1),
-                "1,Task,task0,NEW,dfh7y3",
+                "1,Task,task0,NEW,dfh7y3,0,0",
                 "После сохранения задач в файл вторая строка отличается от ожидаемой"
         );
 

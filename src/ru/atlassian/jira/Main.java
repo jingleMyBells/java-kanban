@@ -1,4 +1,6 @@
 package ru.atlassian.jira;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.DoubleSummaryStatistics;
 import java.util.List;
 import ru.atlassian.jira.model.Task;
@@ -14,7 +16,39 @@ public class Main {
 
     public static void main(String[] args) {
 //        myTest();
-        fileTest();
+//        fileTest();
+        testPrioritized();
+    }
+
+    public static void testPrioritized() {
+        TaskManager testManager = Managers.getDefault();
+        Duration duration = Duration.ofMinutes(10);
+        LocalDateTime start1 = LocalDateTime.of(2023, 1, 1, 1, 0, 0);
+        LocalDateTime start2 = LocalDateTime.of(2023, 2, 1, 1, 0, 0);
+        LocalDateTime start3 = LocalDateTime.of(2023, 3, 1, 1, 0, 0);
+
+        testManager.createEpic(new Epic("test epic", "sdgf3"));
+        Epic epic = testManager.getAllEpics().get(0);
+
+
+        testManager.createSubtask(new Subtask("1 february", "dfdgjhhdfg", epic.getId(), duration, start2));
+        testManager.createSubtask(new Subtask("1 march", "dfdgjhhdfg", epic.getId(), duration, start3));
+        testManager.createSubtask(new Subtask("No date", "dfdgjhhdfg", epic.getId()));
+        testManager.createSubtask(new Subtask("1 january", "dfdgjhhdfg", epic.getId(), duration, start1));
+
+//        for (Task task : testManager.getPrioritizedTasks()) {
+//            System.out.println(task);
+//        }
+        if (epic.getDuration().isPresent()) {
+            System.out.println(epic.getDuration().get());
+        } else {
+            System.out.println("С длительностью хуйня");
+        }
+
+
+
+
+
     }
 
     public static void fileTest() {

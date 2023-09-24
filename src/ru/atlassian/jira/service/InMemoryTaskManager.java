@@ -196,6 +196,12 @@ public class InMemoryTaskManager implements TaskManager {
         return this.historyManager.getHistory();
     }
 
+    public List<Task> getPrioritizedTasks() {
+        List<Task> allTasks = getAllStoredTasks();
+        Collections.sort(allTasks);
+        return allTasks;
+    }
+
     protected int createNewTaskId() {
         return ++this.autoIncrement;
     }
@@ -227,6 +233,13 @@ public class InMemoryTaskManager implements TaskManager {
         } else {
             epic.setStatus(Status.NEW);
         }
+    }
+
+    private List<Task> getAllStoredTasks() {
+        Map<Integer, Task> allTasks = new HashMap<>();
+        allTasks.putAll(this.tasks);
+        allTasks.putAll(this.subtasks);
+        return new ArrayList<>(allTasks.values());
     }
 
 }
