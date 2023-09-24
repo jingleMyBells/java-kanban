@@ -26,7 +26,7 @@ public class FileBackedTasksManagerTest extends TaskManagerTest<FileBackedTasksM
 
 
     @Override
-    public TaskManager getProperManager() {
+    public FileBackedTasksManager getProperManager() {
         return Managers.getFileBacked("tasks_test.csv");
     }
 

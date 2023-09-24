@@ -35,7 +35,7 @@ public class Subtask extends Task {
     public String toString() {
         String taskDuration = "0";
         if (getDuration().isPresent()) {
-            taskDuration = String.valueOf(getDuration().get().toMinutes());
+            taskDuration = String.valueOf(duration);
         }
         String dateTime = "0";
         if (getStartTime().isPresent()) {

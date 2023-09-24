@@ -11,7 +11,8 @@ public class Task implements Comparable<Task>{
     protected String title;
     protected String description;
     protected Status status;
-    protected Duration duration;
+//    protected Duration duration;
+    protected int duration;
     protected LocalDateTime startTime;
 
     public static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy:HH.mm");
@@ -32,7 +33,7 @@ public class Task implements Comparable<Task>{
         this.title = title;
         this.description = description;
         this.status = status;
-        this.duration = Duration.ofMinutes(duration);
+        this.duration = duration;
         this.startTime = startTime;
     }
 
@@ -71,11 +72,11 @@ public class Task implements Comparable<Task>{
         this.status = status;
     }
 
-    public Optional<Duration> getDuration() {
+    public Optional<Integer> getDuration() {
         return Optional.ofNullable(this.duration);
     }
 
-    public void setDuration(Duration duration) {
+    public void setDuration(Integer duration) {
         this.duration = duration;
     }
 
@@ -89,7 +90,7 @@ public class Task implements Comparable<Task>{
 
     public Optional<LocalDateTime> getEndTime() {
         if (getStartTime().isPresent()) {
-            return Optional.of(getStartTime().get().plus(duration));
+            return Optional.of(getStartTime().get().plus(Duration.ofMinutes(duration)));
         }
         return Optional.empty();
     }
@@ -111,7 +112,7 @@ public class Task implements Comparable<Task>{
     public String toString() {
         String taskDuration = "0";
         if (getDuration().isPresent()) {
-            taskDuration = String.valueOf(getDuration().get().toMinutes());
+            taskDuration = String.valueOf(duration);
         }
         String dateTime = "0";
         if (getStartTime().isPresent()) {

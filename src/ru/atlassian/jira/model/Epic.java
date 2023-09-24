@@ -71,17 +71,17 @@ public class Epic extends Task {
     }
 
     @Override
-    public Optional<Duration> getDuration() {
+    public Optional<Integer> getDuration() {
         Duration cumulativeDuration = Duration.ofMinutes(0);
         for (Subtask subtask : tasks) {
             if (subtask.getDuration().isPresent()) {
-                cumulativeDuration = cumulativeDuration.plus(subtask.getDuration().get());
+                cumulativeDuration = cumulativeDuration.plus(Duration.ofMinutes(subtask.getDuration().get()));
             }
         }
         if (cumulativeDuration.compareTo(Duration.ofMinutes(0)) == 0) {
             return Optional.empty();
         }
-        return Optional.ofNullable(cumulativeDuration);
+        return Optional.of((int)cumulativeDuration.toMinutes());
     }
 
     //TODO: ВОЗМОЖНО НАДО ЗАПРЕТИТЬ СЕТТЕРЫ ДЛЯ РАССЧЕТНЫХ ПОЛЕЙ ЭПИКА
