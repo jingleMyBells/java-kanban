@@ -1,7 +1,15 @@
 package ru.atlassian.jira.service;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.Optional;
+
+import ru.atlassian.jira.exceptions.TaskNotFoundException;
 import ru.atlassian.jira.model.Task;
 import ru.atlassian.jira.model.Epic;
 import ru.atlassian.jira.model.Subtask;
@@ -17,12 +25,15 @@ public class InMemoryTaskManager implements TaskManager {
 
     protected final HistoryManager historyManager;
 
+    protected Set<Task> prioritizedTasks;
+
 
     InMemoryTaskManager() {
         this.tasks = new HashMap<>();
         this.epics = new HashMap<>();
         this.subtasks = new HashMap<>();
         this.historyManager = Managers.getDefaultHistory();
+        this.prioritizedTasks = new TreeSet<>();
     }
 
     @Override
@@ -35,6 +46,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
         task.setId(createNewTaskId());
         this.tasks.put(task.getId(), task);
+        this.prioritizedTasks.add(task);
     }
 
     @Override
@@ -50,6 +62,8 @@ public class InMemoryTaskManager implements TaskManager {
             taskForUpdate.setTitle(task.getTitle());
             taskForUpdate.setDescription(task.getDescription());
             taskForUpdate.setStatus(task.getStatus());
+            this.prioritizedTasks.remove(task);
+            this.prioritizedTasks.add(task);
         }
     }
 
@@ -64,6 +78,7 @@ public class InMemoryTaskManager implements TaskManager {
             this.historyManager.remove(taskId);
         }
         this.tasks.clear();
+        this.prioritizedTasks = new TreeSet<>(this.subtasks.values());
     }
 
     @Override
@@ -75,6 +90,10 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteTaskById(int id) {
+        Task task = this.tasks.get(id);
+        if (task != null) {
+            this.prioritizedTasks.remove(task);
+        }
         this.tasks.remove(id);
         this.historyManager.remove(id);
     }
@@ -144,7 +163,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void createSubtask(Subtask subtask) throws ManagerInvalidTimePropertiesException {
+    public void createSubtask(Subtask subtask) {
         Optional<Task> intersectedTask = taskIntersections(subtask);
         if (intersectedTask.isPresent()) {
             throw new ManagerInvalidTimePropertiesException(
@@ -157,8 +176,9 @@ public class InMemoryTaskManager implements TaskManager {
             this.subtasks.put(subtask.getId(), subtask);
             epic.addSubtask(subtask);
             this.checkAndModifyEpicStatus(epic);
+            this.prioritizedTasks.add(subtask);
         } else {
-            System.out.println("Эпик не найден, подзадача не сохранена");
+            throw new TaskNotFoundException("Эпик не найден, подзадача не сохранена");
         }
     }
 
@@ -177,6 +197,8 @@ public class InMemoryTaskManager implements TaskManager {
             subtaskForUpdate.setStatus(subtask.getStatus());
             Epic epic = this.epics.get(subtask.getEpicId());
             this.checkAndModifyEpicStatus(epic);
+            this.prioritizedTasks.remove(subtask);
+            this.prioritizedTasks.add(subtask);
         }
     }
 
@@ -195,6 +217,7 @@ public class InMemoryTaskManager implements TaskManager {
             epic.getTasks().clear();
             this.checkAndModifyEpicStatus(epic);
         }
+        this.prioritizedTasks = new TreeSet<>(this.tasks.values());
     }
 
     @Override
@@ -213,8 +236,8 @@ public class InMemoryTaskManager implements TaskManager {
             this.checkAndModifyEpicStatus(epic);
             this.subtasks.remove(id);
             this.historyManager.remove(id);
+            this.prioritizedTasks.remove(subtaskToDelete);
         }
-
     }
 
     @Override
@@ -223,9 +246,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     public List<Task> getPrioritizedTasks() {
-        List<Task> allTasks = getAllStoredTasks();
-        Collections.sort(allTasks);
-        return allTasks;
+        return new ArrayList<>(this.prioritizedTasks);
     }
 
     protected int createNewTaskId() {

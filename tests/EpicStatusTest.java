@@ -1,6 +1,6 @@
-package ru.atlassian.jira.tests;
-
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import ru.atlassian.jira.model.Epic;
 import ru.atlassian.jira.model.Status;
@@ -8,11 +8,9 @@ import ru.atlassian.jira.model.Subtask;
 import ru.atlassian.jira.service.Managers;
 import ru.atlassian.jira.service.TaskManager;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 class EpicStatusTest {
 
-    public static TaskManager taskManager;
+    public TaskManager taskManager;
     public static Epic epicToTest;
 
     @BeforeEach
@@ -24,8 +22,9 @@ class EpicStatusTest {
     }
 
     @Test
-    public void correctStatusWithNoTasks() {
-            assertEquals(
+    @DisplayName("Проверяет статус пустого эпика")
+    public void shouldEpicStatusWhenNoSubtaskInEpic() {
+            Assertions.assertEquals(
                     epicToTest.getStatus(),
                     Status.NEW,
                     "При отсутствии подзадач тестовый эпик в неожиданном статусе"
@@ -33,12 +32,13 @@ class EpicStatusTest {
     }
 
     @Test
-    public void correctStatusWithAllNewTasks() {
+    @DisplayName("Проверяет статус эпика только с новыми задачами")
+    public void shouldEpicStatusNewWhenAllSubtasksNew() {
         for (int i = 0; i < 4; i++) {
             taskManager.createSubtask(new Subtask("fhgdfg", "fhgjgh", epicToTest.getId()));
         }
 
-        assertEquals(
+        Assertions.assertEquals(
                 epicToTest.getStatus(),
                 Status.NEW,
                 "При всех новых подзадачах тестовый эпик в неожиданном статусе"
@@ -47,7 +47,8 @@ class EpicStatusTest {
     }
 
     @Test
-    public void correctStatusWithAllDoneTasks() {
+    @DisplayName("Проверяет статус эпика только со сделанными задачами")
+    public void shouldEpicStatusDoneWhenAllSubtasksDone() {
         for (int i = 0; i < 4; i++) {
             taskManager.createSubtask(new Subtask("fhgdfg", "fhgjgh", epicToTest.getId()));
         }
@@ -57,7 +58,7 @@ class EpicStatusTest {
             taskManager.updateSubtask(subTask);
         }
 
-        assertEquals(
+        Assertions.assertEquals(
                 epicToTest.getStatus(),
                 Status.DONE,
                 "При всех новых подзадачах тестовый эпик в неожиданном статусе"
@@ -65,7 +66,8 @@ class EpicStatusTest {
     }
 
     @Test
-    public void correctStatusWithNewAndDoneTasks() {
+    @DisplayName("Проверяет статус эпика со сделанными и новыми задачами")
+    public void shouldEpicStatusProgressWhenSubtasksNewOrDone() {
         for (int i = 0; i < 2; i++) {
             taskManager.createSubtask(new Subtask("fhgdfg", "fhgjgh", epicToTest.getId()));
         }
@@ -74,7 +76,7 @@ class EpicStatusTest {
         subtask2.setStatus(Status.DONE);
         taskManager.updateSubtask(subtask2);
 
-        assertEquals(
+        Assertions.assertEquals(
                 epicToTest.getStatus(),
                 Status.IN_PROGRESS,
                 "При всех новых либо сделанных подзадачах тестовый эпик в неожиданном статусе"
@@ -84,7 +86,8 @@ class EpicStatusTest {
     }
 
     @Test
-    public void correctStatusWithAllInProgressTasks() {
+    @DisplayName("Проверяет статус эпика с задачами в статусе IN_PGORESS")
+    public void shouldEpicStatusProgressWhenSubtasksInProgress() {
         for (int i = 0; i < 4; i++) {
             taskManager.createSubtask(new Subtask("fhgdfg", "fhgjgh", epicToTest.getId()));
         }
@@ -94,7 +97,7 @@ class EpicStatusTest {
             taskManager.updateSubtask(subTask);
         }
 
-        assertEquals(
+        Assertions.assertEquals(
                 epicToTest.getStatus(),
                 Status.IN_PROGRESS,
                 "При всех новых подзадачах тестовый эпик в неожиданном статусе"

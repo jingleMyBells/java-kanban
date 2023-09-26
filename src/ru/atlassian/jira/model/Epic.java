@@ -9,6 +9,7 @@ import java.util.Optional;
 
 public class Epic extends Task {
     private final List<Subtask> tasks;
+
     public Epic(String title, String description) {
         super(title, description, Status.NEW);
         tasks = new ArrayList<>();
@@ -83,8 +84,6 @@ public class Epic extends Task {
         }
         return Optional.of((int)cumulativeDuration.toMinutes());
     }
-
-    //TODO: ВОЗМОЖНО НАДО ЗАПРЕТИТЬ СЕТТЕРЫ ДЛЯ РАССЧЕТНЫХ ПОЛЕЙ ЭПИКА
 
     @Override
     public boolean equals(Object o) {

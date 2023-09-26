@@ -1,6 +1,6 @@
-package ru.atlassian.jira.tests;
-
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import ru.atlassian.jira.model.Status;
 import ru.atlassian.jira.model.Task;
@@ -8,8 +8,6 @@ import ru.atlassian.jira.service.Managers;
 import ru.atlassian.jira.service.TaskManager;
 
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class InMemoryHistoryManagerTest {
 
@@ -21,7 +19,8 @@ public class InMemoryHistoryManagerTest {
     }
 
     @Test
-    public void getsHistory() {
+    @DisplayName("Проверяет получение истории")
+    public void shouldReturnCorrecrHistorySizeAndFirstTaskID() {
         for (int i = 0; i < 5; i++) {
             taskManager.createTask(new Task("4fgd4", "45tfdzc", Status.NEW));
         }
@@ -31,13 +30,13 @@ public class InMemoryHistoryManagerTest {
 
         List<Task> taskHistory = taskManager.getHistory();
 
-        assertEquals(
+        Assertions.assertEquals(
                 taskHistory.size(),
                 5,
                 "При штатном запросе истории длина списка задач отличается от ожидаемой"
         );
 
-        assertEquals(
+        Assertions.assertEquals(
                 taskHistory.get(0).getId(),
                 1,
                 "При штатном запросе истории ID первой задачи отличается от ожидаемого"
@@ -46,26 +45,28 @@ public class InMemoryHistoryManagerTest {
     }
 
     @Test
-    public void getsEmptyHistory() {
-        assertTrue(
+    @DisplayName("Проверяет получение пустой истории")
+    public void shouldTrueWhenHistoryEmpty() {
+        Assertions.assertTrue(
                 taskManager.getHistory().isEmpty(),
                 "При запросе пустой истории мененджер вернул не пустой список"
         );
     }
 
     @Test
-    public void addsTaskToHistory() {
+    @DisplayName("Проверяет добавление задачи в историю")
+    public void shouldFalseEmptyHistoryAndReturnFirstTaskCorrectId() {
         taskManager.createTask(new Task("324fdgf", "456ygfds", Status.DONE));
         taskManager.getTaskById(1);
 
         List<Task> taskHistory = taskManager.getHistory();
 
-        assertFalse(
+        Assertions.assertFalse(
                 taskHistory.isEmpty(),
                 "После запроса задачи история пустая"
         );
 
-        assertEquals(
+        Assertions.assertEquals(
                 taskHistory.get(0).getId(),
                 1,
                 "ID задачи в истории после добавления отличается от ожидаемого"
@@ -73,12 +74,13 @@ public class InMemoryHistoryManagerTest {
     }
 
     @Test
-    public void addsTaskDublicate() {
+    @DisplayName("Проверяет добавление дубликата задачи в историю")
+    public void shouldReturnHistorySizeEqualsOne() {
         taskManager.createTask(new Task("bhfdjdg", "sdggj3", Status.NEW));
         taskManager.getTaskById(1);
         taskManager.getTaskById(1);
 
-        assertEquals(
+        Assertions.assertEquals(
                 taskManager.getHistory().size(),
                 1,
                 "В историю удалось добавить дубликат задачи"
@@ -86,7 +88,8 @@ public class InMemoryHistoryManagerTest {
     }
 
     @Test
-    public void removesTaskFromHead() {
+    @DisplayName("Проверяет удаление задачи из начала истории")
+    public void shouldNotReturnFirstTaskIdAfterItWasHistoryHead() {
         for (int i = 0; i < 3; i++) {
             taskManager.createTask(new Task("fdhfg", "dfghfg", Status.NEW));
         }
@@ -98,7 +101,7 @@ public class InMemoryHistoryManagerTest {
 
         List<Task> tasksHistory = taskManager.getHistory();
 
-        assertNotEquals(
+        Assertions.assertNotEquals(
                 tasksHistory.get(0).getId(),
                 1,
                 "Задача из начала истории не удалена при повторном просмотре"
@@ -107,7 +110,8 @@ public class InMemoryHistoryManagerTest {
     }
 
     @Test
-    public void removesTaskFromTail() {
+    @DisplayName("Проверяет удаление задачи из конца истории")
+    public void shourldReturnCorrectHistorySizeAndLastTaskIdAfterTailDeletion() {
         for (int i = 0; i < 3; i++) {
             taskManager.createTask(new Task("fdhfg", "dfghfg", Status.NEW));
         }
@@ -120,13 +124,13 @@ public class InMemoryHistoryManagerTest {
 
         List<Task> tasksHistory = taskManager.getHistory();
 
-        assertEquals(
+        Assertions.assertEquals(
                 tasksHistory.size(),
                 2,
                 "Длина истории после удаления последней задачи отличается от ожидаемой"
         );
 
-         assertEquals(
+        Assertions.assertEquals(
                  tasksHistory.get(1).getId(),
                  2,
                  "ID последней задачи в истории после удаления хвоста списка отличается от ожидаемого"
@@ -135,7 +139,8 @@ public class InMemoryHistoryManagerTest {
     }
 
     @Test
-    public void removesTaskInBetween() {
+    @DisplayName("Проверяет удаление задачи из середины истории")
+    public void shourldReturnCorrectHistorySizeAndMiddleTaskIdAfterMiddleDeletion() {
         for (int i = 0; i < 3; i++) {
             taskManager.createTask(new Task("fdhfg", "dfghfg", Status.NEW));
         }
@@ -148,13 +153,13 @@ public class InMemoryHistoryManagerTest {
 
         List<Task> tasksHistory = taskManager.getHistory();
 
-        assertEquals(
+        Assertions.assertEquals(
                 tasksHistory.size(),
                 2,
                 "Длина истории после удаления задачи из середины отличается от ожидаемой"
         );
 
-        assertEquals(
+        Assertions.assertEquals(
                 tasksHistory.get(1).getId(),
                 3,
                 "ID последней задачи в истории после удаления задачи из сережины отличается от ожидаемого"
