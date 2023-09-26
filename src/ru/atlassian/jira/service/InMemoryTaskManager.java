@@ -2,6 +2,8 @@ package ru.atlassian.jira.service;
 
 import java.time.LocalDateTime;
 import java.util.*;
+
+import ru.atlassian.jira.exceptions.TaskNotFoundException;
 import ru.atlassian.jira.model.Task;
 import ru.atlassian.jira.model.Epic;
 import ru.atlassian.jira.model.Subtask;
@@ -144,7 +146,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void createSubtask(Subtask subtask) throws ManagerInvalidTimePropertiesException {
+    public void createSubtask(Subtask subtask) {
         Optional<Task> intersectedTask = taskIntersections(subtask);
         if (intersectedTask.isPresent()) {
             throw new ManagerInvalidTimePropertiesException(
@@ -158,7 +160,7 @@ public class InMemoryTaskManager implements TaskManager {
             epic.addSubtask(subtask);
             this.checkAndModifyEpicStatus(epic);
         } else {
-            System.out.println("Эпик не найден, подзадача не сохранена");
+            throw new TaskNotFoundException("Эпик не найден, подзадача не сохранена");
         }
     }
 

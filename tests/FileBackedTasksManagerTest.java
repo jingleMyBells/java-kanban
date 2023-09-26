@@ -1,5 +1,4 @@
-package ru.atlassian.jira.tests;
-
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import ru.atlassian.jira.exceptions.ManagerReadException;
@@ -19,10 +18,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-
-public class FileBackedTasksManagerTest extends TaskManagerTest{
+public class FileBackedTasksManagerTest extends TaskManagerTest {
 
 
     @Override
@@ -41,7 +37,7 @@ public class FileBackedTasksManagerTest extends TaskManagerTest{
 
         File filename = new File("tasks_test.csv");
 
-        assertTrue(filename.exists());
+        Assertions.assertTrue(filename.exists());
 
 
         List<String> lines = new ArrayList<>();
@@ -55,13 +51,13 @@ public class FileBackedTasksManagerTest extends TaskManagerTest{
             throw new ManagerReadException("Ошибка чтения задач из файла");
         }
 
-        assertEquals(
+        Assertions.assertEquals(
                 lines.get(0),
                 "id,type,title,status,description,epicId,duration,startTime",
                 "После сохранения задач в файл строка заголовков отличается от ожидаемой"
         );
 
-        assertEquals(
+        Assertions.assertEquals(
                 lines.get(1),
                 "1,Task,task0,NEW,dfh7y3,0,0",
                 "После сохранения задач в файл вторая строка отличается от ожидаемой"
@@ -80,7 +76,7 @@ public class FileBackedTasksManagerTest extends TaskManagerTest{
 
         File filename = new File("tasks_test.csv");
 
-        assertTrue(filename.exists());
+        Assertions.assertTrue(filename.exists());
 
         List<String> lines = new ArrayList<>();
 
@@ -93,7 +89,7 @@ public class FileBackedTasksManagerTest extends TaskManagerTest{
             throw new ManagerReadException("Ошибка чтения задач из файла");
         }
 
-        assertEquals(
+        Assertions.assertEquals(
                 lines.get(lines.size() - 1),
                 "3,2",
                 "После сохранения истории в файла строка с историей отличается от ожидаемой"
@@ -114,13 +110,13 @@ public class FileBackedTasksManagerTest extends TaskManagerTest{
 
         Task task = taskManager2.getTaskById(1);
 
-        assertEquals(
+        Assertions.assertEquals(
                 task.getId(),
                 1,
                 "ID задачи после восстановления из файла отличается от ожидаемого"
         );
 
-        assertEquals(
+        Assertions.assertEquals(
                 task.getTitle(),
                 "task0",
                 "ID задачи после восстановления из файла отличается от ожидаемого"
@@ -142,7 +138,7 @@ public class FileBackedTasksManagerTest extends TaskManagerTest{
         List<Task> tasksInNewManager = taskManager2.getAllTasks();
 
 
-        assertEquals(
+        Assertions.assertEquals(
                 tasksInNewManager.get(tasksInNewManager.size() - 1).getId(),
                 4,
                 "После восстановления автоинкремента ID новой задачи отличается от ожидаемого"
