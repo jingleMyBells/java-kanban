@@ -1,5 +1,6 @@
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import ru.atlassian.jira.exceptions.ManagerReadException;
 import ru.atlassian.jira.model.Status;
@@ -27,7 +28,8 @@ public class FileBackedTasksManagerTest extends TaskManagerTest {
     }
 
     @Test
-    public void storesTasksInFile() {
+    @DisplayName("Проверяет создание файла на диске")
+    public void shouldReturnTitlesInFirstLineAndFirstTaskInSecondLine() {
         for (int i = 0; i < 3; i++) {
             taskManager.createTask(new Task("task" + i, "dfh7y3", Status.NEW));
         }
@@ -66,7 +68,8 @@ public class FileBackedTasksManagerTest extends TaskManagerTest {
     }
 
     @Test
-    public void storesHistoryInFile() {
+    @DisplayName("Проверяет запись истории в файл")
+    public void shouldReturnTasksIDsInLastLine() {
         for (int i = 0; i < 3; i++) {
             taskManager.createTask(new Task("task" + i, "dfh7y3", Status.NEW));
         }
@@ -98,7 +101,8 @@ public class FileBackedTasksManagerTest extends TaskManagerTest {
     }
 
     @Test
-    public void restoresTasksFromFile() {
+    @DisplayName("Проверяет восстановление задач из файла")
+    public void shouldReturnCorrectIDandTitleWithAnotherManagerAndSameFile() {
         for (int i = 0; i < 3; i++) {
             taskManager.createTask(new Task("task" + i, "dfh7y3", Status.NEW));
         }
@@ -126,7 +130,8 @@ public class FileBackedTasksManagerTest extends TaskManagerTest {
     }
 
     @Test
-    public void restoresAutoincrementFromFile() {
+    @DisplayName("Проверяет восстановление автоинкремента идентификаторов из файла")
+    public void shouldCreateNewTaskInNewManagerWithCorrectID() {
         for (int i = 0; i < 3; i++) {
             taskManager.createTask(new Task("task" + i, "dfh7y3", Status.NEW));
         }

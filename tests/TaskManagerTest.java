@@ -1,5 +1,6 @@
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import ru.atlassian.jira.exceptions.ManagerInvalidTimePropertiesException;
 import ru.atlassian.jira.service.Managers;
@@ -15,7 +16,7 @@ import java.util.List;
 
 public abstract class TaskManagerTest {
 
-    public static TaskManager taskManager;
+    public TaskManager taskManager;
 
     public TaskManager getProperManager() {
         return Managers.getDefault();
@@ -28,7 +29,8 @@ public abstract class TaskManagerTest {
 
 
     @Test
-    public void createsNewTaskWithEmptyTaskList() {
+    @DisplayName("Проверяет создание задачи при пустом списке задач")
+    public void shouldTaskNotNullHasCorrectTitleWithNoTasks() {
         Task firstTask = new Task("Test task1", "Test description", Status.NEW);
         taskManager.createTask(firstTask);
         Task firstTaskGot = taskManager.getTaskById(1);
@@ -43,7 +45,8 @@ public abstract class TaskManagerTest {
     }
 
     @Test
-    public void createsNewTask() {
+    @DisplayName("Проверяет штатное создание задачи")
+    public void shouldIncermentTaskListSize() {
         Task firstTask = new Task("Test task1", "Test description", Status.NEW);
         taskManager.createTask(firstTask);
         Task secondTask = new Task("Test task2", "Test description", Status.NEW);
@@ -60,7 +63,8 @@ public abstract class TaskManagerTest {
 
 
     @Test
-    public void createsNewTaskWithIncorrectId() {
+    @DisplayName("Проверяет попытку подсунуть менеджеру некорректный id задачи")
+    public void shouldCreateBothTasksIncrementingIdAndGetThemById() {
         String title = "Test task1";
         Task firstTask = new Task(title, "Test description", Status.NEW);
         taskManager.createTask(firstTask);
@@ -94,7 +98,8 @@ public abstract class TaskManagerTest {
     }
 
     @Test
-    public void updatesTask() {
+    @DisplayName("Проверяет штатное обновление задачи")
+    public void shouldChangeTaskStatusAndReturnCorrectTaskStatus() {
         Task firstTask = new Task("Test task1", "Test description", Status.NEW);
         taskManager.createTask(firstTask);
 
@@ -111,7 +116,8 @@ public abstract class TaskManagerTest {
     }
 
     @Test
-    public void updatesNonExistingTask() {
+    @DisplayName("Проверяет обновление несуществующей задачи")
+    public void shouldNotUpdateExistingTask() {
         String title1 = "Test task1";
         Task firstTask = new Task(title1, "Test description", Status.NEW);
         taskManager.createTask(firstTask);
@@ -128,7 +134,8 @@ public abstract class TaskManagerTest {
     }
 
     @Test
-    public void getsAllTasks() {
+    @DisplayName("Проверяет штатное получение всех задач списком")
+    public void shouldReturnCreatedTasksTitles() {
         Task firstTask = new Task("Test task1", "Test description", Status.NEW);
         Task secondTask = new Task("Test task2", "Test description", Status.NEW);
         Task thirdTask = new Task("Test task3", "Test description", Status.NEW);
@@ -152,7 +159,8 @@ public abstract class TaskManagerTest {
     }
 
     @Test
-    public void getsAllTasksWithEmptyTaskList() {
+    @DisplayName("Проверяет получение пустого списка задач")
+    public void shouldReceiveEmptyTaskList() {
         Assertions.assertTrue(
                 taskManager.getAllTasks().isEmpty(),
                 "При отсутствии задач менеджер вернул не пустой список задач"
@@ -160,7 +168,8 @@ public abstract class TaskManagerTest {
     }
 
     @Test
-    public void deletesAllTasks() {
+    @DisplayName("Проверяет удаление всех задач")
+    public void shouldReturnEmptyListWhenAllTasksDeleted() {
         Task firstTask = new Task("Test task1", "Test description", Status.NEW);
         Task secondTask = new Task("Test task2", "Test description", Status.NEW);
         Task thirdTask = new Task("Test task3", "Test description", Status.NEW);
@@ -185,7 +194,8 @@ public abstract class TaskManagerTest {
     }
 
     @Test
-    public void getsTaskById() {
+    @DisplayName("Проверяет штатное получение задачи по идентификатору")
+    public void shouldReturnTaskWithCorrectTitle() {
         Task task = new Task("Test title", "Test descrition", Status.NEW);
         taskManager.createTask(task);
 
@@ -204,7 +214,8 @@ public abstract class TaskManagerTest {
     }
 
     @Test
-    public void getsNonExistingTaskById() {
+    @DisplayName("Проверяет получение задачи по несуществующему идентификатору")
+    public void shouldReturnNullWhenTaskWithIDDoesntExist() {
         Task task = new Task("Test title", "Test descrition", Status.NEW);
         taskManager.createTask(task);
 
@@ -218,7 +229,8 @@ public abstract class TaskManagerTest {
     }
 
     @Test
-    public void deletesTaskById() {
+    @DisplayName("Проверяет удаление задачи по идентификатору")
+    public void shouldReturnNullWhenTaskIsDeleted() {
         Task task = new Task("Test title", "Test descrition", Status.NEW);
         taskManager.createTask(task);
 
@@ -233,7 +245,8 @@ public abstract class TaskManagerTest {
     }
 
     @Test
-    public void deletesNonExistingTaskById() {
+    @DisplayName("Проверяет удаление несуществующей задачи")
+    public void shouldReturnSameTaskListSizeAfterDeletingNonExistingTask() {
         Task task = new Task("Test title", "Test descrition", Status.NEW);
         taskManager.createTask(task);
 
@@ -252,7 +265,8 @@ public abstract class TaskManagerTest {
     }
 
     @Test
-    public void createsEpic() {
+    @DisplayName("Проверяет штатное создание эпика")
+    public void shouldIncrementEpicListSize() {
         Epic firstEpic = new Epic("Test epic1", "Test description");
         taskManager.createEpic(firstEpic);
         Epic secondEpic = new Epic("Test epic2", "Test description");
@@ -268,12 +282,16 @@ public abstract class TaskManagerTest {
     }
 
     @Test
-    public void createsEpicWithEmptyEpicList() {
+    @DisplayName("Проверяет создание эпика при пустом списке эпиков")
+    public void shouldReturnEpicWithCorrectTitleWhenEpicListEmpty() {
         Epic firstEpic = new Epic("Test task1", "Test description");
         taskManager.createEpic(firstEpic);
         Epic firstEpicGot = taskManager.getEpicById(1);
 
-        Assertions.assertNotNull(firstEpicGot, "После создания эпика при пустом менеджере возвращается null вместо эпика");
+        Assertions.assertNotNull(
+                firstEpicGot,
+                "После создания эпика при пустом менеджере возвращается null вместо эпика"
+        );
         Assertions.assertEquals(
                 firstEpicGot.getTitle(),
                 firstEpic.getTitle(),
@@ -283,7 +301,8 @@ public abstract class TaskManagerTest {
     }
 
     @Test
-    public void createsEpicWithIncorrectId() {
+    @DisplayName("Проверяет попытку создания эпика с некорректным ID")
+    public void shouldCreateBothEpicsIncrementingIdAndGetThemById() {
         String title = "Test epic1";
         Epic firstEpic = new Epic(title, "Test description");
         taskManager.createEpic(firstEpic);
@@ -317,7 +336,8 @@ public abstract class TaskManagerTest {
     }
 
     @Test
-    public void updatesEpic() {
+    @DisplayName("Проверяет штатное обновление эпика")
+    public void shouldChangeEpicDescrAndReturnCorrectEpicDescr() {
         Epic firstEpic = new Epic("Test epic1", "Test description");
         taskManager.createEpic(firstEpic);
 
@@ -333,7 +353,8 @@ public abstract class TaskManagerTest {
     }
 
     @Test
-    public void updatesNonExistingEpic() {
+    @DisplayName("Проверяет обновление несуществующего эпика")
+    public void shouldNotUpdateExistingEpic() {
         String title1 = "Test epic1";
         Epic firstEpic = new Epic(title1, "Test description");
         taskManager.createEpic(firstEpic);
@@ -350,7 +371,8 @@ public abstract class TaskManagerTest {
     }
 
     @Test
-    public void getsAllTEpics() {
+    @DisplayName("Проверяет штатное получение всех эпиков списком")
+    public void shouldReturnCreatedEpicsTitles() {
         Epic firstEpic = new Epic("Test epic1", "Test description");
         Epic secondEpic = new Epic("Test epic2", "Test description");
         Epic thirdEpic = new Epic("Test epic3", "Test description");
@@ -373,7 +395,8 @@ public abstract class TaskManagerTest {
     }
 
     @Test
-    public void getsAllTasksWithEmptyEpicList() {
+    @DisplayName("Проверяет получение пустого списка эпиков'")
+    public void shouldReceiveEmptyEpicList() {
         Assertions.assertTrue(
                 taskManager.getAllEpics().isEmpty(),
                 "При отсутствии эпиков менеджер вернул не пустой список эпиков"
@@ -381,7 +404,8 @@ public abstract class TaskManagerTest {
     }
 
     @Test
-    public void deletesAllEpics() {
+    @DisplayName("Проверяет удаление всех эпиков'")
+    public void shouldEmptyEpicAndSubtaskListWhenAllEpicDeleted() {
         Epic firstEpic = new Epic("Test epic1", "Test description");
         Epic secondEpic = new Epic("Test epic2", "Test description");
         Epic thirdEpic = new Epic("Test epic3", "Test description");
@@ -420,7 +444,8 @@ public abstract class TaskManagerTest {
     }
 
     @Test
-    public void getsEpicById() {
+    @DisplayName("Проверяет штатное получение эпика по идентификатору")
+    public void shouldReturnEpicWithCorrectTitle() {
         Epic epic = new Epic("Test title", "Test descrition");
         taskManager.createEpic(epic);
 
@@ -438,7 +463,8 @@ public abstract class TaskManagerTest {
     }
 
     @Test
-    public void getsNonExistingEpicById() {
+    @DisplayName("Проверяет получение эпика по несуществующему идентификатору")
+    public void shouldReturnNullWhenEpicWithIDDoesntExist() {
         Epic epic = new Epic("Test title", "Test descrition");
         taskManager.createEpic(epic);
 
@@ -451,7 +477,8 @@ public abstract class TaskManagerTest {
     }
 
     @Test
-    public void deletesEpicById() {
+    @DisplayName("Проверяет удаление эпика по идентификатору")
+    public void shouldNullAndEmptySubtasksWhenEpicIsDeleted() {
         Epic epic = new Epic("Test title", "Test descrition");
         taskManager.createEpic(epic);
 
@@ -477,7 +504,8 @@ public abstract class TaskManagerTest {
     }
 
     @Test
-    public void deletesNonExistingEpicById() {
+    @DisplayName("Проверяет удаление несуществующего эпика")
+    public void shouldSameEpicSubtaskListSizeAfterDeletingNonExistingEpic() {
         Epic epic = new Epic("Test title", "Test description");
         taskManager.createEpic(epic);
 
@@ -508,7 +536,8 @@ public abstract class TaskManagerTest {
     }
 
     @Test
-    public void getsAllEpicSubtasks() {
+    @DisplayName("Проверяет получение всех подзадач эпика")
+    public void shouldReturnCorrectSizeSubtaskListAndFirstSubtaskTitle() {
         Epic epic = new Epic("Test title", "Test description");
         taskManager.createEpic(epic);
         Epic epicGot = taskManager.getEpicById(1);
@@ -556,7 +585,8 @@ public abstract class TaskManagerTest {
     }
 
     @Test
-    public void getsAllNonExistingEpicSubtasks() {
+    @DisplayName("Проверяет получение всех подзадач несуществующего эпика")
+    public void shouldTrueEmptySubtaskListWhenEpicNotExist() {
         Assertions.assertTrue(
                 taskManager.getAllEpicSubtasks(1).isEmpty(),
                 "При получении всех подзадач несуществующего эпика список вернулся не пустым"
@@ -564,7 +594,8 @@ public abstract class TaskManagerTest {
     }
 
     @Test
-    public void createsNewSubtask() {
+    @DisplayName("Проверяет штатное создание подзадачи")
+    public void shouldReturnNotEmptySubTaskListAndCorrectTitleWhenSubtaskCreated() {
         Epic epic = new Epic("Test epic1", "Test description");
         taskManager.createEpic(epic);
 
@@ -589,7 +620,8 @@ public abstract class TaskManagerTest {
     }
 
     @Test
-    public void createsNewTaskWithEmptySubtaskList() {
+    @DisplayName("Проверяет создание подзадачи при отсутствии других подзадач")
+    public void shouldNotNullAndReturmCorrectTitleWhenNoSubtasks() {
         Epic epic = new Epic("Test task1", "Test description");
         taskManager.createEpic(epic);
         Epic epicGot = taskManager.getEpicById(1);
@@ -614,7 +646,8 @@ public abstract class TaskManagerTest {
     }
 
     @Test
-    public void createsNewSubWithIncorrectId() {
+    @DisplayName("Проверяет попытку создать подзадачу с некорректным идентификатором")
+    public void shouldReturnSubtasksWithCorrectIDAndTitlesWhenIDisSetWrong() {
         Epic epic = new Epic("Test epic", "Test description");
         taskManager.createEpic(epic);
         Task epicGot = taskManager.getEpicById(1);
@@ -652,7 +685,8 @@ public abstract class TaskManagerTest {
     }
 
     @Test
-    public void updatesSubtask() {
+    @DisplayName("Проверяет штатное обновление подзадачи")
+    public void shouldReturnStatusDoneAfterSubtaskUpdate() {
         Epic epic = new Epic("Test epic1", "Test description");
         taskManager.createEpic(epic);
 
@@ -674,7 +708,8 @@ public abstract class TaskManagerTest {
     }
 
     @Test
-    public void updatesNonExistingSubtask() {
+    @DisplayName("Проверяет обновление несуществующей подзадачи")
+    public void shouldNotChangeAnythingInExistingTask() {
         Epic epic = new Epic("Test epic", "Test description");
         taskManager.createEpic(epic);
 
@@ -696,7 +731,8 @@ public abstract class TaskManagerTest {
     }
 
     @Test
-    public void getsAllSubtasks() {
+    @DisplayName("Проверяет получение всех подзадач")
+    public void shouldReturnCorrectTitlesForAllCreatedSubTasks() {
         Epic firstEpic = new Epic("Test epic1", "Test description");
         Epic secondEpic = new Epic("Test epic2", "Test description");
         taskManager.createEpic(firstEpic);
@@ -725,7 +761,8 @@ public abstract class TaskManagerTest {
     }
 
     @Test
-    public void getsAllSubtasksWithEmptyTaskList() {
+    @DisplayName("Проверяет получение всех подзадач при пустом списке")
+    public void shouldReturnEmptySubtaskListWhenNoSubtasksCreated() {
         Assertions.assertTrue(
                 taskManager.getAllSubtasks().isEmpty(),
                 "При отсутствии подзадач менеджер вернул не пустой список эпиков"
@@ -733,7 +770,8 @@ public abstract class TaskManagerTest {
     }
 
     @Test
-    public void deletesAllSubtasks() {
+    @DisplayName("Проверяет удаление всех подзадач")
+    public void shouldReturnSubtaskSizeNotEqualSubtaskListBeforeDeletion() {
         Epic epic = new Epic("Test epic1", "Test description");
         taskManager.createEpic(epic);
 
@@ -761,7 +799,8 @@ public abstract class TaskManagerTest {
     }
 
     @Test
-    public void getsSubtaskById() {
+    @DisplayName("Проверяет получение подзадачи по ID")
+    public void shouldNotNullAndReturnCorrectTitle() {
         Epic epic = new Epic("Test title", "Test descrition");
         taskManager.createEpic(epic);
 
@@ -785,7 +824,8 @@ public abstract class TaskManagerTest {
     }
 
     @Test
-    public void getsNonExistingSubtaskById() {
+    @DisplayName("Проверяет получение несуществующей подзадачи по ID")
+    public void shouldNullWhenSubtaskNotExist() {
         Epic epic = new Epic("Test title", "Test descrition");
         taskManager.createEpic(epic);
 
@@ -801,7 +841,8 @@ public abstract class TaskManagerTest {
     }
 
     @Test
-    public void deletesSubtaskById() {
+    @DisplayName("Проверяет удаление подзадачи по ID")
+    public void shouldNullWhenTaskDeletedAndSubtaskSizeEqualsOne() {
         Epic epic = new Epic("Test title", "Test descrition");
         taskManager.createEpic(epic);
 
@@ -829,7 +870,8 @@ public abstract class TaskManagerTest {
     }
 
     @Test
-    public void deletesNonExistingSubtaskById() {
+    @DisplayName("Проверяет удаление несуществующей подзадачи")
+    public void shouldReturnSameListSizeWhenDeletingSubtaskNotExist() {
         Epic epic = new Epic("Test title", "Test description");
         taskManager.createEpic(epic);
 
@@ -852,7 +894,8 @@ public abstract class TaskManagerTest {
     }
 
     @Test
-    public void checksTaskWithTimeCreation() {
+    @DisplayName("Проверяет создание задачи с временными параметрами")
+    public void shouldReturnStartAndEndTimeAndDurationForTaskWithTimes() {
         LocalDateTime estimatedStartTime = LocalDateTime.of(2023, 9, 24, 23, 23);
         int estimatedDuration = 10;
 
@@ -907,7 +950,8 @@ public abstract class TaskManagerTest {
     }
 
     @Test
-    public void checksSubTaskWithTimeCreation() {
+    @DisplayName("Проверяет создание подзадачи с временными параметрами")
+    public void shouldReturnStartAndEndTimeAndDurationForSubTaskWithTimes() {
         LocalDateTime estimatedStartTime = LocalDateTime.of(2023, 9, 24, 23, 23);
         int estimatedDuration = 10;
 
@@ -964,7 +1008,8 @@ public abstract class TaskManagerTest {
     }
 
     @Test
-    public void checksEpicTimePropertiesCalculation() {
+    @DisplayName("Проверяет вычисление временных параметров для эпика")
+    public void shouldReturnStartAndEndTimeAndDurationForEpicWithTimes() {
         LocalDateTime startTime = LocalDateTime.of(2023, 9, 24, 23, 33);
         LocalDateTime startTime2 = LocalDateTime.of(2023, 9, 24, 23, 53);
         int duration = 10;
@@ -1016,7 +1061,8 @@ public abstract class TaskManagerTest {
     }
 
     @Test
-    public void checksTasksIntersection() {
+    @DisplayName("Проверяет возможность завести задачи с пересечениями по времени")
+    public void shouldThrowExceptionsWhenTasksHaveIntersectionsAndNotNullWhenTimeIsOK() {
         LocalDateTime time1 = LocalDateTime.of(2023, 9, 24, 23, 33);
         LocalDateTime time2 = LocalDateTime.of(2023, 9, 24, 23, 43);
         LocalDateTime time3 = LocalDateTime.of(2023, 9, 24, 23, 53);
@@ -1051,7 +1097,8 @@ public abstract class TaskManagerTest {
     }
 
     @Test
-    public void checksPrioritizedList() {
+    @DisplayName("Проверяет получение списка задач по приоритетам")
+    public void  shouldReturnIDIsThreeWhenThirdTaskStartTimeIsFirst() {
         LocalDateTime time1 = LocalDateTime.of(2023, 9, 24, 23, 33);
         LocalDateTime time2 = LocalDateTime.of(2023, 9, 24, 23, 53);
         LocalDateTime time3 = LocalDateTime.of(2023, 9, 24, 23, 13);

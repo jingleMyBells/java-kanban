@@ -1,5 +1,6 @@
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import ru.atlassian.jira.model.Status;
 import ru.atlassian.jira.model.Task;
@@ -18,7 +19,8 @@ public class InMemoryHistoryManagerTest {
     }
 
     @Test
-    public void getsHistory() {
+    @DisplayName("Проверяет получение истории")
+    public void shouldReturnCorrecrHistorySizeAndFirstTaskID() {
         for (int i = 0; i < 5; i++) {
             taskManager.createTask(new Task("4fgd4", "45tfdzc", Status.NEW));
         }
@@ -43,7 +45,8 @@ public class InMemoryHistoryManagerTest {
     }
 
     @Test
-    public void getsEmptyHistory() {
+    @DisplayName("Проверяет получение пустой истории")
+    public void shouldTrueWhenHistoryEmpty() {
         Assertions.assertTrue(
                 taskManager.getHistory().isEmpty(),
                 "При запросе пустой истории мененджер вернул не пустой список"
@@ -51,7 +54,8 @@ public class InMemoryHistoryManagerTest {
     }
 
     @Test
-    public void addsTaskToHistory() {
+    @DisplayName("Проверяет добавление задачи в историю")
+    public void shouldFalseEmptyHistoryAndReturnFirstTaskCorrectId() {
         taskManager.createTask(new Task("324fdgf", "456ygfds", Status.DONE));
         taskManager.getTaskById(1);
 
@@ -70,7 +74,8 @@ public class InMemoryHistoryManagerTest {
     }
 
     @Test
-    public void addsTaskDublicate() {
+    @DisplayName("Проверяет добавление дубликата задачи в историю")
+    public void shouldReturnHistorySizeEqualsOne() {
         taskManager.createTask(new Task("bhfdjdg", "sdggj3", Status.NEW));
         taskManager.getTaskById(1);
         taskManager.getTaskById(1);
@@ -83,7 +88,8 @@ public class InMemoryHistoryManagerTest {
     }
 
     @Test
-    public void removesTaskFromHead() {
+    @DisplayName("Проверяет удаление задачи из начала истории")
+    public void shouldNotReturnFirstTaskIdAfterItWasHistoryHead() {
         for (int i = 0; i < 3; i++) {
             taskManager.createTask(new Task("fdhfg", "dfghfg", Status.NEW));
         }
@@ -104,7 +110,8 @@ public class InMemoryHistoryManagerTest {
     }
 
     @Test
-    public void removesTaskFromTail() {
+    @DisplayName("Проверяет удаление задачи из конца истории")
+    public void shourldReturnCorrectHistorySizeAndLastTaskIdAfterTailDeletion() {
         for (int i = 0; i < 3; i++) {
             taskManager.createTask(new Task("fdhfg", "dfghfg", Status.NEW));
         }
@@ -132,7 +139,8 @@ public class InMemoryHistoryManagerTest {
     }
 
     @Test
-    public void removesTaskInBetween() {
+    @DisplayName("Проверяет удаление задачи из середины истории")
+    public void shourldReturnCorrectHistorySizeAndMiddleTaskIdAfterMiddleDeletion() {
         for (int i = 0; i < 3; i++) {
             taskManager.createTask(new Task("fdhfg", "dfghfg", Status.NEW));
         }
