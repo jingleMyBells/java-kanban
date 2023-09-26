@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 
-
 public abstract class TaskManagerTest {
 
     public static TaskManager taskManager;
