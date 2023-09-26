@@ -8,7 +8,6 @@ import ru.atlassian.jira.model.Task;
 import ru.atlassian.jira.service.FileBackedTasksManager;
 import ru.atlassian.jira.service.Managers;
 import ru.atlassian.jira.service.TaskManager;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -64,7 +63,6 @@ public class FileBackedTasksManagerTest extends TaskManagerTest {
                 "1,Task,task0,NEW,dfh7y3,0,0",
                 "После сохранения задач в файл вторая строка отличается от ожидаемой"
         );
-
     }
 
     @Test
@@ -97,7 +95,6 @@ public class FileBackedTasksManagerTest extends TaskManagerTest {
                 "3,2",
                 "После сохранения истории в файла строка с историей отличается от ожидаемой"
         );
-
     }
 
     @Test
@@ -125,8 +122,6 @@ public class FileBackedTasksManagerTest extends TaskManagerTest {
                 "task0",
                 "ID задачи после восстановления из файла отличается от ожидаемого"
         );
-
-
     }
 
     @Test
@@ -137,18 +132,14 @@ public class FileBackedTasksManagerTest extends TaskManagerTest {
         }
 
         TaskManager taskManager2 = Managers.getFileBacked("tasks_test.csv");
-
         taskManager2.createTask(new Task("Newtask", "dfh7y3", Status.NEW));
-
         List<Task> tasksInNewManager = taskManager2.getAllTasks();
-
 
         Assertions.assertEquals(
                 tasksInNewManager.get(tasksInNewManager.size() - 1).getId(),
                 4,
                 "После восстановления автоинкремента ID новой задачи отличается от ожидаемого"
          );
-
     }
 
     @AfterEach

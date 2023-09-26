@@ -6,7 +6,6 @@ import ru.atlassian.jira.model.Status;
 import ru.atlassian.jira.model.Task;
 import ru.atlassian.jira.service.Managers;
 import ru.atlassian.jira.service.TaskManager;
-
 import java.util.List;
 
 public class InMemoryHistoryManagerTest {
@@ -27,7 +26,6 @@ public class InMemoryHistoryManagerTest {
         for (int i = 0; i < 5; i++) {
             taskManager.getTaskById(i + 1);
         }
-
         List<Task> taskHistory = taskManager.getHistory();
 
         Assertions.assertEquals(
@@ -41,7 +39,6 @@ public class InMemoryHistoryManagerTest {
                 1,
                 "При штатном запросе истории ID первой задачи отличается от ожидаемого"
         );
-
     }
 
     @Test
@@ -93,12 +90,10 @@ public class InMemoryHistoryManagerTest {
         for (int i = 0; i < 3; i++) {
             taskManager.createTask(new Task("fdhfg", "dfghfg", Status.NEW));
         }
-
         taskManager.getTaskById(1);
         taskManager.getTaskById(2);
         taskManager.getTaskById(3);
         taskManager.getTaskById(1);
-
         List<Task> tasksHistory = taskManager.getHistory();
 
         Assertions.assertNotEquals(
@@ -115,13 +110,10 @@ public class InMemoryHistoryManagerTest {
         for (int i = 0; i < 3; i++) {
             taskManager.createTask(new Task("fdhfg", "dfghfg", Status.NEW));
         }
-
         taskManager.getTaskById(1);
         taskManager.getTaskById(2);
         taskManager.getTaskById(3);
-
         taskManager.deleteTaskById(3);
-
         List<Task> tasksHistory = taskManager.getHistory();
 
         Assertions.assertEquals(
@@ -135,7 +127,6 @@ public class InMemoryHistoryManagerTest {
                  2,
                  "ID последней задачи в истории после удаления хвоста списка отличается от ожидаемого"
          );
-
     }
 
     @Test
@@ -144,13 +135,10 @@ public class InMemoryHistoryManagerTest {
         for (int i = 0; i < 3; i++) {
             taskManager.createTask(new Task("fdhfg", "dfghfg", Status.NEW));
         }
-
         taskManager.getTaskById(1);
         taskManager.getTaskById(2);
         taskManager.getTaskById(3);
-
         taskManager.deleteTaskById(2);
-
         List<Task> tasksHistory = taskManager.getHistory();
 
         Assertions.assertEquals(
@@ -165,5 +153,4 @@ public class InMemoryHistoryManagerTest {
                 "ID последней задачи в истории после удаления задачи из сережины отличается от ожидаемого"
         );
     }
-
 }
