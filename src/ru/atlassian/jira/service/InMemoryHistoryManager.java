@@ -10,11 +10,9 @@ import java.util.LinkedList;
 import ru.atlassian.jira.model.Task;
 
 public class InMemoryHistoryManager implements HistoryManager {
-
     private Node head = null;
     private Node tail = null;
     private final Map<Integer, Node> historyMap = new HashMap<>();
-
 
     @Override
     public List<Task> getHistory() {
@@ -70,7 +68,6 @@ public class InMemoryHistoryManager implements HistoryManager {
         } else {
             tail = prev;
         }
-
     }
 
     private static class Node {
@@ -97,6 +94,4 @@ public class InMemoryHistoryManager implements HistoryManager {
             return Objects.hash(task);
         }
     }
-
-
 }

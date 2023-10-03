@@ -17,16 +17,12 @@ import ru.atlassian.jira.model.Status;
 import ru.atlassian.jira.exceptions.ManagerInvalidTimePropertiesException;
 
 public class InMemoryTaskManager implements TaskManager {
-
     protected int autoIncrement;
     protected final Map<Integer, Task> tasks;
     protected final Map<Integer, Epic> epics;
     protected final Map<Integer, Subtask> subtasks;
-
     protected final HistoryManager historyManager;
-
     protected Set<Task> prioritizedTasks;
-
 
     InMemoryTaskManager() {
         this.tasks = new HashMap<>();
@@ -111,7 +107,6 @@ public class InMemoryTaskManager implements TaskManager {
             epicForUpdate.setTitle(epic.getTitle());
             epicForUpdate.setDescription(epic.getDescription());
         }
-
     }
 
     @Override
@@ -293,8 +288,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (taskToValidate.getStartTime().isPresent() && taskToValidate.getEndTime().isPresent()) {
             final LocalDateTime validatedStartTime = taskToValidate.getStartTime().get();
             final LocalDateTime validatedEndTime = taskToValidate.getEndTime().get();
-            List<Task> tasks = getAllStoredTasks();
-            for (Task task : tasks) {
+            for (Task task : getAllStoredTasks()) {
                 if (task.getStartTime().isEmpty() || task.getEndTime().isEmpty()) {
                     continue;
                 }
@@ -307,5 +301,4 @@ public class InMemoryTaskManager implements TaskManager {
         }
         return Optional.empty();
     }
-
 }

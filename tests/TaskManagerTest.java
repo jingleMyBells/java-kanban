@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public abstract class TaskManagerTest {
-
     public TaskManager taskManager;
 
     public TaskManager getProperManager() {
@@ -50,12 +49,11 @@ public abstract class TaskManagerTest {
         List<Task> tasks = taskManager.getAllTasks();
 
         Assertions.assertEquals(
-                tasks.size(),
                 2,
+                tasks.size(),
                 "При штатном создании задачи итоговый список задач неожиданной длины"
         );
     }
-
 
     @Test
     @DisplayName("Проверяет попытку подсунуть менеджеру некорректный id задачи")
@@ -101,8 +99,8 @@ public abstract class TaskManagerTest {
         taskManager.updateTask(firstTaskGot);
 
         Assertions.assertEquals(
-                taskManager.getTaskById(1).getStatus(),
                 Status.DONE,
+                taskManager.getTaskById(1).getStatus(),
                 "При обновлении статуса задачи он не изменился в менеджере"
         );
     }
@@ -248,8 +246,8 @@ public abstract class TaskManagerTest {
         List<Epic> epics = taskManager.getAllEpics();
 
         Assertions.assertEquals(
-                epics.size(),
                 2,
+                epics.size(),
                 "При штатном создании задачи итоговый список эпиков неожиданной длины"
         );
     }
@@ -314,8 +312,8 @@ public abstract class TaskManagerTest {
         firstEpicGot.setDescription("lalala");
         taskManager.updateEpic(firstEpicGot);
         Assertions.assertEquals(
-                taskManager.getEpicById(1).getDescription(),
                 "lalala",
+                taskManager.getEpicById(1).getDescription(),
                 "При обновлении описания эпика оно не изменилось в менеджере"
         );
     }
@@ -450,8 +448,8 @@ public abstract class TaskManagerTest {
         );
 
         Assertions.assertEquals(
-                taskManager.getAllSubtasks().size(),
                 0,
+                taskManager.getAllSubtasks().size(),
                 "После удаления эпика по ID подзадача не удалилась"
         );
     }
@@ -627,8 +625,8 @@ public abstract class TaskManagerTest {
         taskManager.updateSubtask(subtaskGot);
 
         Assertions.assertEquals(
-                taskManager.getAllEpicSubtasks(1).get(0).getStatus(),
                 Status.DONE,
+                taskManager.getAllEpicSubtasks(1).get(0).getStatus(),
                 "При обновлении статуса подзадачи он не изменилось в менеджере"
         );
     }
@@ -764,8 +762,8 @@ public abstract class TaskManagerTest {
         );
 
         Assertions.assertEquals(
-                taskManager.getAllSubtasks().size(),
                 1,
+                taskManager.getAllSubtasks().size(),
                 "После удаления подазадачи по ID подзадача не удалилась"
         );
     }
@@ -817,14 +815,14 @@ public abstract class TaskManagerTest {
         );
 
         Assertions.assertEquals(
-                estimatedStartTime.compareTo(task.getStartTime().get()),
                 0,
+                estimatedStartTime.compareTo(task.getStartTime().get()),
                 "При создании задачи с временными параметрами время старта не совпало с ожидаемым"
         );
 
         Assertions.assertEquals(
-                estimatedEndTime.compareTo(task.getEndTime().get()),
                 0,
+                estimatedEndTime.compareTo(task.getEndTime().get()),
                 "При создании задачи с временными параметрами время завершения не совпало с ожидаемым"
         );
 
@@ -869,14 +867,14 @@ public abstract class TaskManagerTest {
         );
 
         Assertions.assertEquals(
-                estimatedStartTime.compareTo(task.getStartTime().get()),
                 0,
+                estimatedStartTime.compareTo(task.getStartTime().get()),
                 "При создании задачи с временными параметрами время старта не совпало с ожидаемым"
         );
 
         Assertions.assertEquals(
-                estimatedEndTime.compareTo(task.getEndTime().get()),
                 0,
+                estimatedEndTime.compareTo(task.getEndTime().get()),
                 "При создании задачи с временными параметрами время завершения не совпало с ожидаемым"
         );
 
@@ -921,22 +919,22 @@ public abstract class TaskManagerTest {
         );
 
         Assertions.assertEquals(
-                epic.getStartTime().get().compareTo(startTime),
                 0,
+                epic.getStartTime().get().compareTo(startTime),
                 "При наполнении эпика задачами дата старта отличается от ожидаемого"
 
         );
 
         Assertions.assertEquals(
-                epic.getEndTime().get().compareTo(estimatedEndTime),
                 0,
+                epic.getEndTime().get().compareTo(estimatedEndTime),
                 "При наполнении эпика задачами дата завершения отличается от ожидаемого"
 
         );
 
         Assertions.assertEquals(
-                epic.getDuration().get(),
                 20,
+                epic.getDuration().get(),
                 "При наполнении эпика задачами дата завершения отличается от ожидаемого"
         );
     }
@@ -987,8 +985,8 @@ public abstract class TaskManagerTest {
         Task task = taskManager.getPrioritizedTasks().get(0);
 
         Assertions.assertEquals(
-                task.getId(),
                 3,
+                task.getId(),
                 "В списке по приоритетам ID наиболее приоритетной задачи отличается от ожидаемого"
         );
     }

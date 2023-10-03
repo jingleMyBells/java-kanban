@@ -23,9 +23,7 @@ import java.util.Map;
 import java.util.TreeSet;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
-
     private final File filename;
-
 
     FileBackedTasksManager(String filename) {
         this.filename = new File(filename);
@@ -155,7 +153,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
     }
 
-
     private void restoreFromFile() throws ManagerReadException, ManagerEmptyStorageException {
         List<String> tasksToRestore = new ArrayList<>();
 
@@ -173,7 +170,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         }
 
         if (!tasksToRestore.isEmpty()) {
-
             String lastString = tasksToRestore.get(tasksToRestore.size() - 1);
             String[] lastStringSplitted = lastString.split(",");
 
@@ -210,7 +206,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
             restoreAutoincrement();
 
-
             String[] taskIds = String.valueOf(tasksToRestore.get(tasksToRestore.size() - 1)).split(",");
             for (String id : taskIds) {
                 if (!id.isEmpty()) {
@@ -226,7 +221,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         }
 
         this.prioritizedTasks = new TreeSet<>(getAllStoredTasks());
-
     }
 
     private void restoreAutoincrement() {

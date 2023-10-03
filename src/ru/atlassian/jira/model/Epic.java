@@ -100,5 +100,4 @@ public class Epic extends Task {
                 title, status.toString(), description
         );
     }
-
 }

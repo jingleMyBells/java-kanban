@@ -13,9 +13,7 @@ public class Main {
 
     public static void main(String[] args) {
         myTest();
-
     }
-
 
     public static void fileTest() {
         FileBackedTasksManager fileManager = Managers.getFileBacked("tasks.csv");
@@ -52,8 +50,6 @@ public class Main {
         System.out.println("все задачи: " + fileManager.getAllTasks());
         System.out.println("все эпики: " + fileManager.getAllEpics());
         System.out.println("все подзадачи: " + fileManager.getAllSubtasks());
-
-
     }
 
     public static void myTest() {
