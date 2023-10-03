@@ -18,7 +18,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FileBackedTasksManagerTest extends TaskManagerTest {
+class FileBackedTasksManagerTest extends TaskManagerTest {
 
 
     @Override
@@ -28,7 +28,7 @@ public class FileBackedTasksManagerTest extends TaskManagerTest {
 
     @Test
     @DisplayName("Проверяет создание файла на диске")
-    public void shouldReturnTitlesInFirstLineAndFirstTaskInSecondLine() {
+    void shouldReturnTitlesInFirstLineAndFirstTaskInSecondLine() {
         for (int i = 0; i < 3; i++) {
             taskManager.createTask(new Task("task" + i, "dfh7y3", Status.NEW));
         }
@@ -53,21 +53,21 @@ public class FileBackedTasksManagerTest extends TaskManagerTest {
         }
 
         Assertions.assertEquals(
-                lines.get(0),
                 "id,type,title,status,description,epicId,duration,startTime",
+                lines.get(0),
                 "После сохранения задач в файл строка заголовков отличается от ожидаемой"
         );
 
         Assertions.assertEquals(
-                lines.get(1),
                 "1,Task,task0,NEW,dfh7y3,0,0",
+                lines.get(1),
                 "После сохранения задач в файл вторая строка отличается от ожидаемой"
         );
     }
 
     @Test
     @DisplayName("Проверяет запись истории в файл")
-    public void shouldReturnTasksIDsInLastLine() {
+    void shouldReturnTasksIDsInLastLine() {
         for (int i = 0; i < 3; i++) {
             taskManager.createTask(new Task("task" + i, "dfh7y3", Status.NEW));
         }
@@ -91,15 +91,15 @@ public class FileBackedTasksManagerTest extends TaskManagerTest {
         }
 
         Assertions.assertEquals(
-                lines.get(lines.size() - 1),
                 "3,2",
+                lines.get(lines.size() - 1),
                 "После сохранения истории в файла строка с историей отличается от ожидаемой"
         );
     }
 
     @Test
     @DisplayName("Проверяет восстановление задач из файла")
-    public void shouldReturnCorrectIDandTitleWithAnotherManagerAndSameFile() {
+    void shouldReturnCorrectIDandTitleWithAnotherManagerAndSameFile() {
         for (int i = 0; i < 3; i++) {
             taskManager.createTask(new Task("task" + i, "dfh7y3", Status.NEW));
         }
@@ -112,21 +112,21 @@ public class FileBackedTasksManagerTest extends TaskManagerTest {
         Task task = taskManager2.getTaskById(1);
 
         Assertions.assertEquals(
-                task.getId(),
                 1,
+                task.getId(),
                 "ID задачи после восстановления из файла отличается от ожидаемого"
         );
 
         Assertions.assertEquals(
-                task.getTitle(),
                 "task0",
+                task.getTitle(),
                 "ID задачи после восстановления из файла отличается от ожидаемого"
         );
     }
 
     @Test
     @DisplayName("Проверяет восстановление автоинкремента идентификаторов из файла")
-    public void shouldCreateNewTaskInNewManagerWithCorrectID() {
+    void shouldCreateNewTaskInNewManagerWithCorrectID() {
         for (int i = 0; i < 3; i++) {
             taskManager.createTask(new Task("task" + i, "dfh7y3", Status.NEW));
         }
@@ -136,8 +136,8 @@ public class FileBackedTasksManagerTest extends TaskManagerTest {
         List<Task> tasksInNewManager = taskManager2.getAllTasks();
 
         Assertions.assertEquals(
-                tasksInNewManager.get(tasksInNewManager.size() - 1).getId(),
                 4,
+                tasksInNewManager.get(tasksInNewManager.size() - 1).getId(),
                 "После восстановления автоинкремента ID новой задачи отличается от ожидаемого"
          );
     }

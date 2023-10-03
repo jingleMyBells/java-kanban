@@ -23,24 +23,24 @@ class EpicStatusTest {
 
     @Test
     @DisplayName("Проверяет статус пустого эпика")
-    public void shouldEpicStatusWhenNoSubtaskInEpic() {
+    void shouldEpicStatusWhenNoSubtaskInEpic() {
             Assertions.assertEquals(
-                    epicToTest.getStatus(),
                     Status.NEW,
+                    epicToTest.getStatus(),
                     "При отсутствии подзадач тестовый эпик в неожиданном статусе"
             );
     }
 
     @Test
     @DisplayName("Проверяет статус эпика только с новыми задачами")
-    public void shouldEpicStatusNewWhenAllSubtasksNew() {
+    void shouldEpicStatusNewWhenAllSubtasksNew() {
         for (int i = 0; i < 4; i++) {
             taskManager.createSubtask(new Subtask("fhgdfg", "fhgjgh", epicToTest.getId()));
         }
 
         Assertions.assertEquals(
-                epicToTest.getStatus(),
                 Status.NEW,
+                epicToTest.getStatus(),
                 "При всех новых подзадачах тестовый эпик в неожиданном статусе"
         );
 
@@ -48,7 +48,7 @@ class EpicStatusTest {
 
     @Test
     @DisplayName("Проверяет статус эпика только со сделанными задачами")
-    public void shouldEpicStatusDoneWhenAllSubtasksDone() {
+    void shouldEpicStatusDoneWhenAllSubtasksDone() {
         for (int i = 0; i < 4; i++) {
             taskManager.createSubtask(new Subtask("fhgdfg", "fhgjgh", epicToTest.getId()));
         }
@@ -59,15 +59,15 @@ class EpicStatusTest {
         }
 
         Assertions.assertEquals(
-                epicToTest.getStatus(),
                 Status.DONE,
+                epicToTest.getStatus(),
                 "При всех новых подзадачах тестовый эпик в неожиданном статусе"
         );
     }
 
     @Test
     @DisplayName("Проверяет статус эпика со сделанными и новыми задачами")
-    public void shouldEpicStatusProgressWhenSubtasksNewOrDone() {
+    void shouldEpicStatusProgressWhenSubtasksNewOrDone() {
         for (int i = 0; i < 2; i++) {
             taskManager.createSubtask(new Subtask("fhgdfg", "fhgjgh", epicToTest.getId()));
         }
@@ -77,8 +77,8 @@ class EpicStatusTest {
         taskManager.updateSubtask(subtask2);
 
         Assertions.assertEquals(
-                epicToTest.getStatus(),
                 Status.IN_PROGRESS,
+                epicToTest.getStatus(),
                 "При всех новых либо сделанных подзадачах тестовый эпик в неожиданном статусе"
         );
 
@@ -87,7 +87,7 @@ class EpicStatusTest {
 
     @Test
     @DisplayName("Проверяет статус эпика с задачами в статусе IN_PGORESS")
-    public void shouldEpicStatusProgressWhenSubtasksInProgress() {
+    void shouldEpicStatusProgressWhenSubtasksInProgress() {
         for (int i = 0; i < 4; i++) {
             taskManager.createSubtask(new Subtask("fhgdfg", "fhgjgh", epicToTest.getId()));
         }
@@ -98,8 +98,8 @@ class EpicStatusTest {
         }
 
         Assertions.assertEquals(
-                epicToTest.getStatus(),
                 Status.IN_PROGRESS,
+                epicToTest.getStatus(),
                 "При всех новых подзадачах тестовый эпик в неожиданном статусе"
         );
     }
