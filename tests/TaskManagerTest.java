@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public abstract class TaskManagerTest {
-
     public TaskManager taskManager;
 
     public TaskManager getProperManager() {
@@ -55,7 +54,6 @@ public abstract class TaskManagerTest {
                 "При штатном создании задачи итоговый список задач неожиданной длины"
         );
     }
-
 
     @Test
     @DisplayName("Проверяет попытку подсунуть менеджеру некорректный id задачи")

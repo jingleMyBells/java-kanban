@@ -20,7 +20,6 @@ import java.util.List;
 
 class FileBackedTasksManagerTest extends TaskManagerTest {
 
-
     @Override
     public FileBackedTasksManager getProperManager() {
         return Managers.getFileBacked("tasks_test.csv");
@@ -39,7 +38,6 @@ class FileBackedTasksManagerTest extends TaskManagerTest {
         File filename = new File("tasks_test.csv");
 
         Assertions.assertTrue(filename.exists());
-
 
         List<String> lines = new ArrayList<>();
 

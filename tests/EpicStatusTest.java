@@ -9,7 +9,6 @@ import ru.atlassian.jira.service.Managers;
 import ru.atlassian.jira.service.TaskManager;
 
 class EpicStatusTest {
-
     public TaskManager taskManager;
     public static Epic epicToTest;
 
@@ -43,7 +42,6 @@ class EpicStatusTest {
                 epicToTest.getStatus(),
                 "При всех новых подзадачах тестовый эпик в неожиданном статусе"
         );
-
     }
 
     @Test
@@ -81,8 +79,6 @@ class EpicStatusTest {
                 epicToTest.getStatus(),
                 "При всех новых либо сделанных подзадачах тестовый эпик в неожиданном статусе"
         );
-
-
     }
 
     @Test
@@ -103,5 +99,4 @@ class EpicStatusTest {
                 "При всех новых подзадачах тестовый эпик в неожиданном статусе"
         );
     }
-
 }

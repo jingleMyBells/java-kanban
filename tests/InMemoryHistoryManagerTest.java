@@ -9,7 +9,6 @@ import ru.atlassian.jira.service.TaskManager;
 import java.util.List;
 
 public class InMemoryHistoryManagerTest {
-
     public static TaskManager taskManager;
 
     @BeforeEach
