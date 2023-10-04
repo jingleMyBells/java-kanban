@@ -1,18 +1,39 @@
 package ru.atlassian.jira.service;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
+import java.awt.*;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
+import ru.atlassian.jira.exceptions.ManagerInvalidTimePropertiesException;
+import ru.atlassian.jira.model.Task;
+import ru.atlassian.jira.model.Epic;
+import ru.atlassian.jira.model.Subtask;
+import ru.atlassian.jira.model.TaskType;
+import ru.atlassian.jira.model.Status;
+
+import javax.swing.text.html.Option;
+
 
 public class HttpTaskServer {
     private static final int PORT = 8080;
+    private static final Charset UTF8 = StandardCharsets.UTF_8;
+    private static final Gson gson = new Gson();
     private final HttpServer server;
+    private static final TaskManager manager = Managers.getFileBacked("tasks.csv");
 
     public HttpTaskServer() throws IOException {
         server = HttpServer.create(new InetSocketAddress(PORT), 0);
@@ -28,76 +49,444 @@ public class HttpTaskServer {
     static class TasksHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
+            String requestPath = exchange.getRequestURI().getPath();
+            String requestMethod = exchange.getRequestMethod();
+            String requestQuery = exchange.getRequestURI().getQuery();
             Endpoint endpoint = getEndpoint(
-                    exchange.getRequestURI().getPath(),
-                    exchange.getRequestMethod(),
-                    exchange.getRequestURI().getQuery()
+                    requestPath,
+                    requestMethod,
+                    requestQuery
             );
 
             switch (endpoint) {
                 case GET_ALL_TASKS:
-                    System.out.println("Получение всех задач");
+                    handleGetAllTasks(exchange);
                     break;
                 case GET_TASK_BY_ID:
-                    System.out.println("Получение задачи по ID");
+                    handleGetTaskById(exchange, requestQuery);
                     break;
                 case POST_TASK:
-                    System.out.println("Изменение/создание задачи");
+                    handlePostTask(exchange);
                     break;
                 case DEL_TASK_BY_ID:
-                    System.out.println("Удаление задачи по айди");
+                    handleDelTaskById(exchange, requestQuery);
                     break;
                 case DEL_TASKS:
-                    System.out.println("Удаление всех задач");
+                    handleDelAllTasks(exchange);
                     break;
                 case GET_ALL_EPICS:
-                    System.out.println("Получение всех эпиков");
+                    handleGetAllEpics(exchange);
                     break;
                 case GET_EPIC_BY_ID:
-                    System.out.println("Получение эпика по айди");
+                    handleGetEpicById(exchange, requestQuery);
                     break;
                 case POST_EPIC:
-                    System.out.println("Создание/изменение эпика");
+                    handlePostEpic(exchange);
                     break;
                 case DEL_EPIC_BY_ID:
-                    System.out.println("Удаление эпика по айди");
+                    handleDelEpicById(exchange, requestQuery);
                     break;
                 case DEL_EPICS:
-                    System.out.println("Удаление всех эпиков");
+                    handleDelAllEpics(exchange);
                     break;
                 case GET_ALL_EPIC_SUBTASKS:
-                    System.out.println("Получение всех подзадач эпика");
+                    handleGetAllEpicSubtask(exchange, requestQuery);
                     break;
                 case GET_ALL_SUBTASKS:
-                    System.out.println("Получение всех подзадач");
+                    handleGetAllSubtasks(exchange);
                     break;
                 case GET_SUBTASK_BY_ID:
-                    System.out.println("Получение подзадачи по айди");
+                    handleGetSubtaskById(exchange, requestQuery);
                     break;
                 case POST_SUBTASK:
-                    System.out.println("Создание изменение подзадачи");
+                    handlePostSubtask(exchange);
                     break;
                 case DEL_SUBTASK_BY_ID:
-                    System.out.println("Удаление подзадачи по айди");
+                    handleDelSubtaskById(exchange, requestQuery);
                     break;
                 case DEL_SUBTASKS:
-                    System.out.println("Удаление всех подзадач");
+                    handleDelAllSubtasks(exchange);
                     break;
                 case GET_HISTORY:
-                    System.out.println("Получение истории");
+                    handleGetHistory(exchange);
                     break;
                 case GET_PRIORITIZED:
-                    System.out.println("Получение всех задач и подзадач по приоритетам");
+                    handleGetPrioritized(exchange);
                     break;
                 case UNKNOWN:
-                    System.out.println("Неизвестный эндпоинт");
+                    handleUnknown(exchange);
                     break;
             }
-
-
         }
 
-        private Endpoint getEndpoint(String path, String method, String query) {
+        private void handleGetAllTasks(HttpExchange e) throws IOException {
+            List<Task> tasks = manager.getAllTasks();
+            sendResponse(e, gson.toJson(tasks), 200);
+        }
+
+        private void handleGetTaskById(HttpExchange e, String query) throws IOException {
+            Map<String, String> queryParams = getQueryParams(query);
+            String responseText = "";
+            int statusCode = 400;
+            if (queryParams.get("id") != null) {
+                int id = 0;
+                Optional<Integer> idFromQuery = getIdFromQueryParams(queryParams.get("id"));
+                if (idFromQuery.isPresent()) {
+                    id = idFromQuery.get();
+                } else {
+                    responseText = "Невалидный идентификатор";
+                }
+                if (id != 0) {
+                    Task task = manager.getTaskById(id);
+                    if (task == null) {
+                        responseText = "Задача с таким идентификатором не найдена";
+                        statusCode = 404;
+                    } else {
+                        responseText = gson.toJson(task);
+                        statusCode = 200;
+                    }
+                }
+            } else {
+                responseText = "Не передан идентификатор задачи";
+            }
+            sendResponse(e, responseText, statusCode);
+        }
+
+        private void handlePostTask(HttpExchange e) throws IOException {
+            int statusCode = 400;
+            String responseText;
+            InputStream inputStream = e.getRequestBody();
+            String requestBody = new String(inputStream.readAllBytes(), UTF8);
+            Task inputTask = null;
+            try {
+                inputTask = gson.fromJson(requestBody, Task.class);
+            } catch (JsonSyntaxException exception) {
+                responseText = "Невалидный JSON";
+            }
+
+            int taskId = inputTask != null ? inputTask.getId() : 0;
+            if ((taskId != 0) && (manager.getTaskById(taskId) != null)){
+                try {
+                    manager.updateTask(inputTask);
+                    responseText = "Успешно обновлена задача " + taskId;
+                    statusCode = 202;
+                } catch (ManagerInvalidTimePropertiesException exception) {
+                    responseText = exception.getMessage();
+                }
+            } else {
+                try {
+                    manager.createTask(inputTask);
+                    responseText = "Успешно создана новая задача";
+                    statusCode = 201;
+                } catch (ManagerInvalidTimePropertiesException exception) {
+                    responseText = exception.getMessage();
+                }
+            }
+            sendResponse(e, responseText, statusCode);
+        }
+
+        private void handleDelTaskById(HttpExchange e, String query) throws IOException {
+            deleteObject(e, query, TaskType.TASK, "Задача");
+//            Map<String, String> queryParams = getQueryParams(query);
+//            String responseText = "";
+//            int statusCode = 400;
+//            if (queryParams.get("id") != null) {
+//                int id = 0;
+//                Optional<Integer> idFromQuery = getIdFromQueryParams(queryParams.get("id"));
+//                if (idFromQuery.isPresent()) {
+//                    id = idFromQuery.get();
+//                } else {
+//                    responseText = "Невалидный идентификатор";
+//                }
+//                if (id != 0) {
+//                    manager.deleteTaskById(id);
+//                    responseText = "Успешно удалена задача";
+//                    statusCode = 204;
+//                }
+//            } else {
+//                responseText = "Не передан идентификатор задачи";
+//            }
+//            sendResponse(e, responseText, statusCode);
+        }
+
+        private void handleDelAllTasks(HttpExchange e) throws IOException {
+            manager.deleteAllTasks();
+            sendResponse(e, "Успешно удалены все задачи", 204);
+        }
+
+        private void handleGetAllEpics(HttpExchange e) throws IOException {
+            List<Epic> epics = manager.getAllEpics();
+            sendResponse(e, gson.toJson(epics), 200);
+        }
+
+        private void handleGetEpicById(HttpExchange e, String query) throws IOException {
+            Map<String, String> queryParams = getQueryParams(query);
+            String responseText = "";
+            int statusCode = 400;
+            if (queryParams.get("id") != null) {
+                int id = 0;
+                Optional<Integer> idFromQuery = getIdFromQueryParams(queryParams.get("id"));
+                if (idFromQuery.isPresent()) {
+                    id = idFromQuery.get();
+                } else {
+                    responseText = "Невалидный идентификатор";
+                }
+                if (id != 0) {
+                    Epic epic = manager.getEpicById(id);
+                    if (epic == null) {
+                        responseText = "Эпик с таким идентификатором не найден";
+                        statusCode = 404;
+                    } else {
+                        responseText = gson.toJson(epic);
+                        statusCode = 200;
+                    }
+                }
+            } else {
+                responseText = "Не передан идентификатор эпика";
+            }
+            sendResponse(e, responseText, statusCode);
+        }
+
+        private void handlePostEpic(HttpExchange e) throws IOException {
+            int statusCode = 400;
+            String responseText;
+            InputStream inputStream = e.getRequestBody();
+            String requestBody = new String(inputStream.readAllBytes(), UTF8);
+            Epic inputEpic = null;
+            try {
+                inputEpic = gson.fromJson(requestBody, Epic.class);
+            } catch (JsonSyntaxException exception) {
+                responseText = "Невалидный JSON";
+            }
+
+            int epicId = inputEpic != null ? inputEpic.getId() : 0;
+            if ((epicId != 0) && (manager.getTaskById(epicId) != null)){
+                try {
+                    manager.updateEpic(inputEpic);
+                    responseText = "Успешно обновлен эпик " + epicId;
+                    statusCode = 202;
+                } catch (ManagerInvalidTimePropertiesException exception) {
+                    responseText = exception.getMessage();
+                }
+            } else {
+                try {
+                    manager.createEpic(inputEpic);
+                    responseText = "Успешно создан новый эпик";
+                    statusCode = 201;
+                } catch (ManagerInvalidTimePropertiesException exception) {
+                    responseText = exception.getMessage();
+                }
+            }
+            sendResponse(e, responseText, statusCode);
+        }
+
+        private void handleDelEpicById(HttpExchange e, String query) throws IOException {
+            deleteObject(e, query, TaskType.EPIC, "Эпик");
+//            Map<String, String> queryParams = getQueryParams(query);
+//            String responseText = "";
+//            int statusCode = 400;
+//            if (queryParams.get("id") != null) {
+//                int id = 0;
+//                Optional<Integer> idFromQuery = getIdFromQueryParams(queryParams.get("id"));
+//                if (idFromQuery.isPresent()) {
+//                    id = idFromQuery.get();
+//                } else {
+//                    responseText = "Невалидный идентификатор";
+//                }
+//                if (id != 0) {
+//                    manager.deleteEpicById(id);
+//                    responseText = "Успешно удален эпик";
+//                    statusCode = 204;
+//                }
+//            } else {
+//                responseText = "Не передан идентификатор эпика";
+//            }
+//            sendResponse(e, responseText, statusCode);
+        }
+
+        private void handleDelAllEpics(HttpExchange e) throws IOException {
+            manager.deleteAllEpics();
+            sendResponse(e, "Успешно удалены все эпики", 204);
+        }
+
+        private void handleGetAllEpicSubtask(HttpExchange e, String query) throws IOException {
+            Map<String, String> queryParams = getQueryParams(query);
+            String responseText = "";
+            int statusCode = 400;
+            if (queryParams.get("id") != null) {
+                int id = 0;
+                Optional<Integer> idFromQuery = getIdFromQueryParams(queryParams.get("id"));
+                if (idFromQuery.isPresent()) {
+                    id = idFromQuery.get();
+                } else {
+                    responseText = "Невалидный идентификатор";
+                }
+                if (id != 0) {
+                    Epic epic = manager.getEpicById(id);
+                    if (epic == null) {
+                        responseText = "Эпик с таким идентификатором не найден";
+                        statusCode = 404;
+                    } else {
+                        List<Subtask> subtasks = manager.getAllEpicSubtasks(id);
+                        responseText = gson.toJson(subtasks);
+                        statusCode = 200;
+                    }
+                }
+            } else {
+                responseText = "Не передан идентификатор эпика";
+            }
+            sendResponse(e, responseText, statusCode);
+        }
+
+        private void handleGetAllSubtasks(HttpExchange e) throws IOException {
+            List<Subtask> subtasks = manager.getAllSubtasks();
+            sendResponse(e, gson.toJson(subtasks), 200);
+        }
+
+        private void handleGetSubtaskById(HttpExchange e, String query) throws IOException {
+            Map<String, String> queryParams = getQueryParams(query);
+            String responseText = "";
+            int statusCode = 400;
+            if (queryParams.get("id") != null) {
+                int id = 0;
+                Optional<Integer> idFromQuery = getIdFromQueryParams(queryParams.get("id"));
+                if (idFromQuery.isPresent()) {
+                    id = idFromQuery.get();
+                } else {
+                    responseText = "Невалидный идентификатор";
+                }
+                if (id != 0) {
+                    Subtask subtask = manager.getSubtaskById(id);
+                    if (subtask == null) {
+                        responseText = "Подзадача с таким идентификатором не найдена";
+                        statusCode = 404;
+                    } else {
+                        responseText = gson.toJson(subtask);
+                        statusCode = 200;
+                    }
+                }
+            } else {
+                responseText = "Не передан идентификатор эпика";
+            }
+            sendResponse(e, responseText, statusCode);
+        }
+        private void handlePostSubtask(HttpExchange e) throws IOException {
+            int statusCode = 400;
+            String responseText;
+            InputStream inputStream = e.getRequestBody();
+            String requestBody = new String(inputStream.readAllBytes(), UTF8);
+            Subtask inputSubtask = null;
+            try {
+                inputSubtask = gson.fromJson(requestBody, Subtask.class);
+            } catch (JsonSyntaxException exception) {
+                responseText = "Невалидный JSON";
+            }
+
+            int subtaskId = inputSubtask != null ? inputSubtask.getId() : 0;
+            if ((subtaskId != 0) && (manager.getTaskById(subtaskId) != null)){
+                try {
+                    manager.updateSubtask(inputSubtask);
+                    responseText = "Успешно обновлен эпик " + subtaskId;
+                    statusCode = 202;
+                } catch (ManagerInvalidTimePropertiesException exception) {
+                    responseText = exception.getMessage();
+                }
+            } else {
+                try {
+                    manager.createSubtask(inputSubtask);
+                    responseText = "Успешно создан новый эпик";
+                    statusCode = 201;
+                } catch (ManagerInvalidTimePropertiesException exception) {
+                    responseText = exception.getMessage();
+                }
+            }
+            sendResponse(e, responseText, statusCode);
+        }
+        private void handleDelSubtaskById(HttpExchange e, String query) throws IOException {
+            deleteObject(e, query, TaskType.SUBTASK, "Подзадача");
+        }
+
+        private void handleDelAllSubtasks(HttpExchange e) throws IOException {
+            manager.deleteAllSubtasks();
+            sendResponse(e, "Успешно удалены все подзадачи", 204);
+        }
+
+        private void handleGetHistory(HttpExchange e) throws IOException {
+            List<Task> history = manager.getHistory();
+            sendResponse(e, gson.toJson(history), 200);
+        }
+
+        private void handleGetPrioritized(HttpExchange e) throws IOException {
+            List<Task> tasks = manager.getPrioritizedTasks();
+            sendResponse(e, gson.toJson(tasks), 200);
+        }
+
+        private void handleUnknown(HttpExchange e) throws IOException {
+            sendResponse(e, "Подходящий эндпоинт не найден", 404);
+        }
+
+
+        private void deleteObject(
+                HttpExchange e,
+                String query,
+                TaskType type,
+                String name)
+                throws IOException {
+            Map<String, String> queryParams = getQueryParams(query);
+            String responseText = "";
+            int statusCode = 400;
+            if (queryParams.get("id") != null) {
+                int id = 0;
+                Optional<Integer> idFromQuery = getIdFromQueryParams(queryParams.get("id"));
+                if (idFromQuery.isPresent()) {
+                    id = idFromQuery.get();
+                } else {
+                    responseText = "Невалидный идентификатор";
+                }
+                if (id != 0) {
+                    switch (type) {
+                        case TASK:
+                            manager.deleteTaskById(id);
+                            break;
+                        case EPIC:
+                            manager.deleteEpicById(id);
+                            break;
+                        case SUBTASK:
+                            manager.deleteSubtaskById(id);
+                            break;
+                    }
+                    responseText = "Успешно удалено: " + name + "; ID: " + id;
+                    statusCode = 204;
+                }
+            } else {
+                responseText = "Не передан идентификатор";
+            }
+            sendResponse(e, responseText, statusCode);
+        }
+
+
+        private void sendResponse(
+                HttpExchange exchange,
+                String responseText,
+                int statusCode
+        ) throws IOException {
+            exchange.sendResponseHeaders(statusCode, 0);
+            if (!responseText.isBlank()) {
+                try (OutputStream output = exchange.getResponseBody()) {
+                    output.write(responseText.getBytes(UTF8));
+                }
+            }
+        }
+
+        private Optional<Integer> getIdFromQueryParams(String queryParam) {
+            try {
+                 return Optional.of(Integer.parseInt(queryParam));
+            } catch (NumberFormatException exception) {
+                return Optional.empty();
+            }
+        }
+
+        private Map<String, String> getQueryParams(String query) {
             Map<String, String> queryParams = new HashMap<>();
             if (query != null) {
                 for (String queryParam : query.split("&")) {
@@ -109,6 +498,12 @@ public class HttpTaskServer {
                     }
                 }
             }
+            return queryParams;
+        }
+
+
+        private Endpoint getEndpoint(String path, String method, String query) {
+            Map<String, String> queryParams = getQueryParams(query);
 
             String[] pathElements = path.split("/");
             if ((pathElements.length == 2) && (pathElements[1].equals("tasks"))) {
@@ -206,6 +601,4 @@ public class HttpTaskServer {
             UNKNOWN
         }
     }
-
-
 }

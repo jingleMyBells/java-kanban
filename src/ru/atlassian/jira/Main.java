@@ -14,8 +14,9 @@ import ru.atlassian.jira.service.TaskManager;
 public class Main {
 
     public static void main(String[] args) {
-        //myTest();
+//        myTest();
         httpTest();
+//        fileTest();
     }
 
     public static void httpTest() {
@@ -32,14 +33,14 @@ public class Main {
     public static void fileTest() {
         FileBackedTasksManager fileManager = Managers.getFileBacked("tasks.csv");
 
-        Task newTask = new Task("Название без запятых", "Записать задачу в файл", Status.NEW);
-        fileManager.createTask(newTask);
-
-        Epic newEpic = new Epic("Тестовый эпик", "КУКлаКОЛДуна");
-        fileManager.createEpic(newEpic);
-
-        Subtask newSubtask = new Subtask("Тестовая подзадача", "авпджлоажрд", newEpic.getId());
-        fileManager.createSubtask(newSubtask);
+//        Task newTask = new Task("Название без запятых", "Записать задачу в файл", Status.NEW);
+//        fileManager.createTask(newTask);
+//
+//        Epic newEpic = new Epic("Тестовый эпик", "КУКлаКОЛДуна");
+//        fileManager.createEpic(newEpic);
+//
+//        Subtask newSubtask = new Subtask("Тестовая подзадача", "авпджлоажрд", newEpic.getId());
+//        fileManager.createSubtask(newSubtask);
 
 
         System.out.println("history restored: " + fileManager.getHistory());
@@ -49,21 +50,21 @@ public class Main {
         System.out.println("все подзадачи: " + fileManager.getAllSubtasks());
         System.out.println("-------");
 
-        Task getSubtask = fileManager.getSubtaskById(3);
-        Task getEpic = fileManager.getEpicById(2);
-        Task getTask = fileManager.getTaskById(1);
+//        Task getSubtask = fileManager.getSubtaskById(3);
+//        Task getEpic = fileManager.getEpicById(2);
+//        Task getTask = fileManager.getTaskById(1);
 
-        System.out.println("history modified" + fileManager.getHistory());
-        System.out.println("-------");
+//        System.out.println("history modified" + fileManager.getHistory());
+//        System.out.println("-------");
 
 
-        if (getTask != null) {
-            fileManager.deleteTaskById(getTask.getId());
-        }
-
-        System.out.println("все задачи: " + fileManager.getAllTasks());
-        System.out.println("все эпики: " + fileManager.getAllEpics());
-        System.out.println("все подзадачи: " + fileManager.getAllSubtasks());
+//        if (getTask != null) {
+//            fileManager.deleteTaskById(getTask.getId());
+//        }
+//
+//        System.out.println("все задачи: " + fileManager.getAllTasks());
+//        System.out.println("все эпики: " + fileManager.getAllEpics());
+//        System.out.println("все подзадачи: " + fileManager.getAllSubtasks());
     }
 
     public static void myTest() {
