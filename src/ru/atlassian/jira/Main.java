@@ -1,10 +1,12 @@
 package ru.atlassian.jira;
+import java.io.IOException;
 import java.util.List;
 import ru.atlassian.jira.model.Task;
 import ru.atlassian.jira.model.Epic;
 import ru.atlassian.jira.model.Status;
 import ru.atlassian.jira.model.Subtask;
 import ru.atlassian.jira.service.FileBackedTasksManager;
+import ru.atlassian.jira.service.HttpTaskServer;
 import ru.atlassian.jira.service.Managers;
 import ru.atlassian.jira.service.TaskManager;
 
@@ -12,7 +14,19 @@ import ru.atlassian.jira.service.TaskManager;
 public class Main {
 
     public static void main(String[] args) {
-        myTest();
+        //myTest();
+        httpTest();
+    }
+
+    public static void httpTest() {
+        try {
+            HttpTaskServer server = new HttpTaskServer();
+            Thread.sleep(180000);
+            server.stop(1);
+        } catch (IOException | InterruptedException e) {
+            System.out.println(e.getMessage());
+        }
+
     }
 
     public static void fileTest() {
