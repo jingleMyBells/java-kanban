@@ -220,7 +220,11 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             }
         }
 
-        this.prioritizedTasks = new TreeSet<>(getAllStoredTasks());
+        System.out.println(this.prioritizedTasks);
+        List<Task> tasksToAdd = getAllStoredTasks();
+//        this.prioritizedTasks = new TreeSet<>(getAllStoredTasks());
+        this.prioritizedTasks.addAll(tasksToAdd);
+        System.out.println(this.prioritizedTasks);
     }
 
     private void restoreAutoincrement() {

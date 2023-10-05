@@ -136,7 +136,9 @@ public class Task implements Comparable<Task>{
         } else if (this.getStartTime().isEmpty() && task.getStartTime().isPresent()) {
             return 1;
         } else {
-            return 0;
+            return this.getId() - task.getId();
+//            System.out.println("Вот сейчас задачи равны и хрен из отсортируешь");
+//            return 0;
         }
     }
 }

@@ -462,7 +462,6 @@ public class HttpTaskServer {
             } else {
                 responseText = "Не передан идентификатор";
             }
-            System.out.println(responseText + " | " + statusCode);
             sendResponse(e, responseText, statusCode);
         }
 
@@ -472,7 +471,8 @@ public class HttpTaskServer {
                 String responseText,
                 int statusCode
         ) throws IOException {
-            exchange.sendResponseHeaders(statusCode, 0);
+            int len = responseText.getBytes(UTF8).length;
+            exchange.sendResponseHeaders(statusCode, len);
             if (!responseText.isBlank()) {
                 try (OutputStream output = exchange.getResponseBody()) {
                     output.write(responseText.getBytes(UTF8));
