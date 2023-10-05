@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import ru.atlassian.jira.exceptions.ManagerInvalidTimePropertiesException;
+import ru.atlassian.jira.exceptions.TaskNotFoundException;
 import ru.atlassian.jira.model.Task;
 import ru.atlassian.jira.model.Epic;
 import ru.atlassian.jira.model.Subtask;
@@ -187,31 +188,11 @@ public class HttpTaskServer {
 
         private void handleDelTaskById(HttpExchange e, String query) throws IOException {
             deleteObject(e, query, TaskType.TASK, "Задача");
-//            Map<String, String> queryParams = getQueryParams(query);
-//            String responseText = "";
-//            int statusCode = 400;
-//            if (queryParams.get("id") != null) {
-//                int id = 0;
-//                Optional<Integer> idFromQuery = getIdFromQueryParams(queryParams.get("id"));
-//                if (idFromQuery.isPresent()) {
-//                    id = idFromQuery.get();
-//                } else {
-//                    responseText = "Невалидный идентификатор";
-//                }
-//                if (id != 0) {
-//                    manager.deleteTaskById(id);
-//                    responseText = "Успешно удалена задача";
-//                    statusCode = 204;
-//                }
-//            } else {
-//                responseText = "Не передан идентификатор задачи";
-//            }
-//            sendResponse(e, responseText, statusCode);
         }
 
         private void handleDelAllTasks(HttpExchange e) throws IOException {
             manager.deleteAllTasks();
-            sendResponse(e, "Успешно удалены все задачи", 204);
+            sendResponse(e, "Успешно удалены все задачи", 200);
         }
 
         private void handleGetAllEpics(HttpExchange e) throws IOException {
@@ -252,61 +233,40 @@ public class HttpTaskServer {
             String responseText;
             InputStream inputStream = e.getRequestBody();
             String requestBody = new String(inputStream.readAllBytes(), UTF8);
-            Epic inputEpic = null;
-            try {
-                inputEpic = gson.fromJson(requestBody, Epic.class);
-            } catch (JsonSyntaxException exception) {
-                responseText = "Невалидный JSON";
-            }
-
-            int epicId = inputEpic != null ? inputEpic.getId() : 0;
-            if ((epicId != 0) && (manager.getTaskById(epicId) != null)){
-                try {
-                    manager.updateEpic(inputEpic);
-                    responseText = "Успешно обновлен эпик " + epicId;
-                    statusCode = 202;
-                } catch (ManagerInvalidTimePropertiesException exception) {
-                    responseText = exception.getMessage();
+            Map<String, String> inputEpicFields = unpackNonTaskJson(requestBody);
+            if ((inputEpicFields.get("title") != null) && (inputEpicFields.get("description") != null)) {
+                Epic inputEpic = new Epic(inputEpicFields.get("title"), inputEpicFields.get("description"));
+                if (inputEpicFields.get("id") != null) {
+                    try {
+                        inputEpic.setId(Integer.parseInt(inputEpicFields.get("id")));
+                        manager.updateEpic(inputEpic);
+                        responseText = "Успешно обновлен эпик " + inputEpicFields.get("id");
+                        statusCode = 202;
+                    } catch (ManagerInvalidTimePropertiesException exception) {
+                        responseText = exception.getMessage();
+                    }
+                } else {
+                    try {
+                        manager.createEpic(inputEpic);
+                        responseText = "Успешно создан новый эпик";
+                        statusCode = 201;
+                    } catch (ManagerInvalidTimePropertiesException exception) {
+                        responseText = exception.getMessage();
+                    }
                 }
             } else {
-                try {
-                    manager.createEpic(inputEpic);
-                    responseText = "Успешно создан новый эпик";
-                    statusCode = 201;
-                } catch (ManagerInvalidTimePropertiesException exception) {
-                    responseText = exception.getMessage();
-                }
+                responseText = "Невалидный набор полей для создания эпика";
             }
             sendResponse(e, responseText, statusCode);
         }
 
         private void handleDelEpicById(HttpExchange e, String query) throws IOException {
             deleteObject(e, query, TaskType.EPIC, "Эпик");
-//            Map<String, String> queryParams = getQueryParams(query);
-//            String responseText = "";
-//            int statusCode = 400;
-//            if (queryParams.get("id") != null) {
-//                int id = 0;
-//                Optional<Integer> idFromQuery = getIdFromQueryParams(queryParams.get("id"));
-//                if (idFromQuery.isPresent()) {
-//                    id = idFromQuery.get();
-//                } else {
-//                    responseText = "Невалидный идентификатор";
-//                }
-//                if (id != 0) {
-//                    manager.deleteEpicById(id);
-//                    responseText = "Успешно удален эпик";
-//                    statusCode = 204;
-//                }
-//            } else {
-//                responseText = "Не передан идентификатор эпика";
-//            }
-//            sendResponse(e, responseText, statusCode);
         }
 
         private void handleDelAllEpics(HttpExchange e) throws IOException {
             manager.deleteAllEpics();
-            sendResponse(e, "Успешно удалены все эпики", 204);
+            sendResponse(e, "Успешно удалены все эпики", 200);
         }
 
         private void handleGetAllEpicSubtask(HttpExchange e, String query) throws IOException {
@@ -375,30 +335,38 @@ public class HttpTaskServer {
             String responseText;
             InputStream inputStream = e.getRequestBody();
             String requestBody = new String(inputStream.readAllBytes(), UTF8);
-            Subtask inputSubtask = null;
-            try {
-                inputSubtask = gson.fromJson(requestBody, Subtask.class);
-            } catch (JsonSyntaxException exception) {
-                responseText = "Невалидный JSON";
-            }
-
-            int subtaskId = inputSubtask != null ? inputSubtask.getId() : 0;
-            if ((subtaskId != 0) && (manager.getTaskById(subtaskId) != null)){
-                try {
-                    manager.updateSubtask(inputSubtask);
-                    responseText = "Успешно обновлен эпик " + subtaskId;
-                    statusCode = 202;
-                } catch (ManagerInvalidTimePropertiesException exception) {
-                    responseText = exception.getMessage();
+            Map<String, String> inputSubtaskFields = unpackNonTaskJson(requestBody);
+            if (
+                    (inputSubtaskFields.get("title") != null)
+                            && (inputSubtaskFields.get("description") != null)
+                            && (inputSubtaskFields.get("epicId") != null)
+            ) {
+                int epicId = Integer.parseInt(inputSubtaskFields.get("epicId"));
+                Subtask inputSubtask = new Subtask(
+                        inputSubtaskFields.get("title"),
+                        inputSubtaskFields.get("description"),
+                        epicId
+                );
+                if (inputSubtaskFields.get("id") != null) {
+                    try {
+                        inputSubtask.setId(Integer.parseInt(inputSubtaskFields.get("id")));
+                        manager.updateSubtask(inputSubtask);
+                        responseText = "Успешно обновлена подзадача " + inputSubtaskFields.get("id");
+                        statusCode = 202;
+                    } catch (ManagerInvalidTimePropertiesException exception) {
+                        responseText = exception.getMessage();
+                    }
+                } else {
+                    try {
+                        manager.createSubtask(inputSubtask);
+                        responseText = "Успешно создана новая подзадача";
+                        statusCode = 201;
+                    } catch (ManagerInvalidTimePropertiesException | TaskNotFoundException exception) {
+                        responseText = exception.getMessage();
+                    }
                 }
             } else {
-                try {
-                    manager.createSubtask(inputSubtask);
-                    responseText = "Успешно создан новый эпик";
-                    statusCode = 201;
-                } catch (ManagerInvalidTimePropertiesException exception) {
-                    responseText = exception.getMessage();
-                }
+                responseText = "Невалидный набор полей для создания эпика";
             }
             sendResponse(e, responseText, statusCode);
         }
@@ -425,6 +393,39 @@ public class HttpTaskServer {
             sendResponse(e, "Подходящий эндпоинт не найден", 404);
         }
 
+        //пришлось написать кастомный распаковщик json'а из-за того что Gson.fromJson
+        // выкидывал ошибки для эпиков и подзадач
+        private Map<String, String> unpackNonTaskJson(String requestBody) {
+            System.out.println(requestBody);
+            Map<String, String> fields = new HashMap<>();
+            String noBracesBody = requestBody.substring(1, requestBody.length() - 1);
+            String[] bodyElems = noBracesBody.split(",");
+            for (String bodyElem : bodyElems) {
+                String[] entry = bodyElem.split(":");
+                String noSpacesKey = entry[0].trim();
+                String noSpacesValue = entry[1].trim();
+                try {
+                    Integer.parseInt(noSpacesValue);
+                    fields.put(
+                            noSpacesKey.substring(1, noSpacesKey.length() - 1),
+                            noSpacesValue
+                    );
+                } catch (NumberFormatException exception) {
+                    if (noSpacesValue.equals("null")) {
+                        fields.put(
+                                noSpacesKey.substring(1, noSpacesKey.length() - 1),
+                                noSpacesValue
+                        );
+                    } else {
+                        fields.put(
+                                noSpacesKey.substring(1, noSpacesKey.length() - 1),
+                                noSpacesValue.substring(1, noSpacesValue.length() - 1)
+                        );
+                    }
+                }
+            }
+            return fields;
+        }
 
         private void deleteObject(
                 HttpExchange e,
@@ -456,11 +457,12 @@ public class HttpTaskServer {
                             break;
                     }
                     responseText = "Успешно удалено: " + name + "; ID: " + id;
-                    statusCode = 204;
+                    statusCode = 200;
                 }
             } else {
                 responseText = "Не передан идентификатор";
             }
+            System.out.println(responseText + " | " + statusCode);
             sendResponse(e, responseText, statusCode);
         }
 

@@ -22,9 +22,9 @@ public class Main {
     public static void httpTest() {
         try {
             HttpTaskServer server = new HttpTaskServer();
-            Thread.sleep(180000);
-            server.stop(1);
-        } catch (IOException | InterruptedException e) {
+            //Thread.sleep(180000);
+            //server.stop(1);
+        } catch (IOException e) {
             System.out.println(e.getMessage());
         }
 
