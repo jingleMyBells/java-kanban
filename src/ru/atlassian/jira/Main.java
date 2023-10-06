@@ -5,18 +5,23 @@ import ru.atlassian.jira.model.Task;
 import ru.atlassian.jira.model.Epic;
 import ru.atlassian.jira.model.Status;
 import ru.atlassian.jira.model.Subtask;
-import ru.atlassian.jira.service.FileBackedTasksManager;
-import ru.atlassian.jira.service.HttpTaskServer;
-import ru.atlassian.jira.service.Managers;
-import ru.atlassian.jira.service.TaskManager;
+import ru.atlassian.jira.service.*;
 
 
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException, InterruptedException {
 //        myTest();
-        httpTest();
+//        httpTest();
 //        fileTest();
+        kvTest();
+    }
+
+    public static void kvTest() throws IOException, InterruptedException {
+        new KVServer().start();
+        KVTaskClient kvTaskClient = new KVTaskClient("http://localhost:8078");
+        kvTaskClient.put("shit", "lalalala");
+        //kvTaskClient.load("shit");
     }
 
     public static void httpTest() {
