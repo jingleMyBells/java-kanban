@@ -1,18 +1,22 @@
 package ru.atlassian.jira.service;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.TypeAdapter;
 import com.google.gson.JsonSyntaxException;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
-import java.awt.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,24 +28,37 @@ import ru.atlassian.jira.model.Task;
 import ru.atlassian.jira.model.Epic;
 import ru.atlassian.jira.model.Subtask;
 import ru.atlassian.jira.model.TaskType;
-import ru.atlassian.jira.model.Status;
-
-import javax.swing.text.html.Option;
 
 
 public class HttpTaskServer {
     private static final int PORT = 8080;
     private static final Charset UTF8 = StandardCharsets.UTF_8;
-    private static final Gson gson = new Gson();
+    private static Gson gson;
     private final HttpServer server;
     private static final TaskManager manager = Managers.getFileBacked("tasks.csv");
 
     public HttpTaskServer() throws IOException {
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.registerTypeAdapter(LocalDateTime.class, new LocalDateAdapter());
+        gson = gsonBuilder.create();
         server = HttpServer.create(new InetSocketAddress(PORT), 0);
         server.createContext("/tasks", new TasksHandler());
         server.start();
         System.out.println("HttpServer Started");
     }
+
+    static class LocalDateAdapter extends TypeAdapter<LocalDateTime> {
+        @Override
+        public void write(final JsonWriter jsonWriter, final LocalDateTime localDateTime) throws IOException {
+            jsonWriter.value(localDateTime.format(Task.FORMATTER));
+        }
+
+        @Override
+        public LocalDateTime read(final JsonReader jsonReader) throws IOException {
+            return LocalDateTime.parse(jsonReader.nextString(), Task.FORMATTER);
+        }
+    }
+
 
     public void stop(int delay) {
         server.stop(delay);

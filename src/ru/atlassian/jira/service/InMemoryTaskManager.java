@@ -279,13 +279,8 @@ public class InMemoryTaskManager implements TaskManager {
 
     protected List<Task> getAllStoredTasks() {
         Map<Integer, Task> allTasks = new HashMap<>();
-        System.out.println("Все задачи");
-        System.out.println(this.tasks);
-        System.out.println("Все подзадачи");
-        System.out.println(this.subtasks);
         allTasks.putAll(this.tasks);
         allTasks.putAll(this.subtasks);
-        System.out.println("Все задачи И подзадачи");
         return new ArrayList<>(allTasks.values());
     }
 

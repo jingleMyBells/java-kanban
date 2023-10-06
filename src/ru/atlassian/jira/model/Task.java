@@ -137,8 +137,6 @@ public class Task implements Comparable<Task>{
             return 1;
         } else {
             return this.getId() - task.getId();
-//            System.out.println("Вот сейчас задачи равны и хрен из отсортируешь");
-//            return 0;
         }
     }
 }
