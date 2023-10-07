@@ -3,19 +3,13 @@ package ru.atlassian.jira.service;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 
-/**
- * Постман: https://www.getpostman.com/collections/a83b61d9e1c81c10575c
- */
 public class KVServer {
 	public static final int PORT = 8078;
 	private final String apiToken;
@@ -44,7 +38,7 @@ public class KVServer {
 					h.sendResponseHeaders(400, 0);
 					return;
 				}
-				sendText(h, this.data.get(key));
+				sendText(h, this.data.getOrDefault(key, ""));
 			} else {
 				System.out.println("/load ждёт GET-запрос, а получил " + h.getRequestMethod());
 				h.sendResponseHeaders(405, 0);
@@ -85,7 +79,6 @@ public class KVServer {
 		} finally {
 			h.close();
 		}
-		System.out.println(this.data);
 	}
 
 	private void register(HttpExchange h) throws IOException {

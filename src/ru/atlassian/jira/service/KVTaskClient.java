@@ -33,7 +33,7 @@ public class KVTaskClient {
                 .header("Accept", "text/html")
                 .build();
 
-        String requestedToken = "";
+        String requestedToken;
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() == 200) {
@@ -64,11 +64,19 @@ public class KVTaskClient {
                     "При попытке сохранения хранилище ответило с кодом " + response.statusCode()
             );
         }
-
     }
 
-    public String load(String key) {
-        return "1213";
-    }
+    public String load(String key) throws IOException, InterruptedException {
+        URI url = URI.create(generalUrl + "/load/" + key + "?API_TOKEN=" + token);
+        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder();
+        HttpRequest request = requestBuilder
+                .GET()
+                .uri(url)
+                .version(HttpClient.Version.HTTP_1_1)
+                .header("Accept", "application/json")
+                .build();
 
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        return response.body();
+    }
 }

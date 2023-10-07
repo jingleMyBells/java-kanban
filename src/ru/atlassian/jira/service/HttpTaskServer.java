@@ -28,6 +28,9 @@ import ru.atlassian.jira.model.Task;
 import ru.atlassian.jira.model.Epic;
 import ru.atlassian.jira.model.Subtask;
 import ru.atlassian.jira.model.TaskType;
+import ru.atlassian.jira.serializers.EpicSerializer;
+import ru.atlassian.jira.serializers.SubtaskSerializer;
+import ru.atlassian.jira.serializers.TaskSerializer;
 
 
 public class HttpTaskServer {
@@ -35,16 +38,27 @@ public class HttpTaskServer {
     private static final Charset UTF8 = StandardCharsets.UTF_8;
     private static Gson gson;
     private final HttpServer server;
-    private static final TaskManager manager = Managers.getFileBacked("tasks.csv");
+    private static final TaskManager manager;
+
+    static {
+        try {
+            manager = Managers.getHttp("http://localhost:8078");
+        } catch (IOException | InterruptedException e) {
+            System.out.println("Исключение в менеджере" + e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
 
     public HttpTaskServer() throws IOException {
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(LocalDateTime.class, new LocalDateAdapter());
+        gsonBuilder.registerTypeAdapter(Task.class, new TaskSerializer());
+        gsonBuilder.registerTypeAdapter(Epic.class, new EpicSerializer());
+        gsonBuilder.registerTypeAdapter(Subtask.class, new SubtaskSerializer());
         gson = gsonBuilder.create();
         server = HttpServer.create(new InetSocketAddress(PORT), 0);
         server.createContext("/tasks", new TasksHandler());
         server.start();
-        System.out.println("HttpServer Started");
     }
 
     static class LocalDateAdapter extends TypeAdapter<LocalDateTime> {
@@ -59,14 +73,13 @@ public class HttpTaskServer {
         }
     }
 
-
     public void stop(int delay) {
         server.stop(delay);
     }
 
     static class TasksHandler implements HttpHandler {
         @Override
-        public void handle(HttpExchange exchange) throws IOException {
+        public void handle(HttpExchange exchange) {
             String requestPath = exchange.getRequestURI().getPath();
             String requestMethod = exchange.getRequestMethod();
             String requestQuery = exchange.getRequestURI().getQuery();
@@ -76,70 +89,75 @@ public class HttpTaskServer {
                     requestQuery
             );
 
-            switch (endpoint) {
-                case GET_ALL_TASKS:
-                    handleGetAllTasks(exchange);
-                    break;
-                case GET_TASK_BY_ID:
-                    handleGetTaskById(exchange, requestQuery);
-                    break;
-                case POST_TASK:
-                    handlePostTask(exchange);
-                    break;
-                case DEL_TASK_BY_ID:
-                    handleDelTaskById(exchange, requestQuery);
-                    break;
-                case DEL_TASKS:
-                    handleDelAllTasks(exchange);
-                    break;
-                case GET_ALL_EPICS:
-                    handleGetAllEpics(exchange);
-                    break;
-                case GET_EPIC_BY_ID:
-                    handleGetEpicById(exchange, requestQuery);
-                    break;
-                case POST_EPIC:
-                    handlePostEpic(exchange);
-                    break;
-                case DEL_EPIC_BY_ID:
-                    handleDelEpicById(exchange, requestQuery);
-                    break;
-                case DEL_EPICS:
-                    handleDelAllEpics(exchange);
-                    break;
-                case GET_ALL_EPIC_SUBTASKS:
-                    handleGetAllEpicSubtask(exchange, requestQuery);
-                    break;
-                case GET_ALL_SUBTASKS:
-                    handleGetAllSubtasks(exchange);
-                    break;
-                case GET_SUBTASK_BY_ID:
-                    handleGetSubtaskById(exchange, requestQuery);
-                    break;
-                case POST_SUBTASK:
-                    handlePostSubtask(exchange);
-                    break;
-                case DEL_SUBTASK_BY_ID:
-                    handleDelSubtaskById(exchange, requestQuery);
-                    break;
-                case DEL_SUBTASKS:
-                    handleDelAllSubtasks(exchange);
-                    break;
-                case GET_HISTORY:
-                    handleGetHistory(exchange);
-                    break;
-                case GET_PRIORITIZED:
-                    handleGetPrioritized(exchange);
-                    break;
-                case UNKNOWN:
-                    handleUnknown(exchange);
-                    break;
+            try {
+                switch (endpoint) {
+                    case GET_ALL_TASKS:
+                        handleGetAllTasks(exchange);
+                        break;
+                    case GET_TASK_BY_ID:
+                        handleGetTaskById(exchange, requestQuery);
+                        break;
+                    case POST_TASK:
+                        handlePostTask(exchange);
+                        break;
+                    case DEL_TASK_BY_ID:
+                        handleDelTaskById(exchange, requestQuery);
+                        break;
+                    case DEL_TASKS:
+                        handleDelAllTasks(exchange);
+                        break;
+                    case GET_ALL_EPICS:
+                        handleGetAllEpics(exchange);
+                        break;
+                    case GET_EPIC_BY_ID:
+                        handleGetEpicById(exchange, requestQuery);
+                        break;
+                    case POST_EPIC:
+                        handlePostEpic(exchange);
+                        break;
+                    case DEL_EPIC_BY_ID:
+                        handleDelEpicById(exchange, requestQuery);
+                        break;
+                    case DEL_EPICS:
+                        handleDelAllEpics(exchange);
+                        break;
+                    case GET_ALL_EPIC_SUBTASKS:
+                        handleGetAllEpicSubtask(exchange, requestQuery);
+                        break;
+                    case GET_ALL_SUBTASKS:
+                        handleGetAllSubtasks(exchange);
+                        break;
+                    case GET_SUBTASK_BY_ID:
+                        handleGetSubtaskById(exchange, requestQuery);
+                        break;
+                    case POST_SUBTASK:
+                        handlePostSubtask(exchange);
+                        break;
+                    case DEL_SUBTASK_BY_ID:
+                        handleDelSubtaskById(exchange, requestQuery);
+                        break;
+                    case DEL_SUBTASKS:
+                        handleDelAllSubtasks(exchange);
+                        break;
+                    case GET_HISTORY:
+                        handleGetHistory(exchange);
+                        break;
+                    case GET_PRIORITIZED:
+                        handleGetPrioritized(exchange);
+                        break;
+                    case UNKNOWN:
+                        handleUnknown(exchange);
+                        break;
+                }
+            } catch (Exception exception) {
+                System.out.println(exception);
             }
         }
 
         private void handleGetAllTasks(HttpExchange e) throws IOException {
             List<Task> tasks = manager.getAllTasks();
-            sendResponse(e, gson.toJson(tasks), 200);
+            String responseText = gson.toJson(tasks);
+            sendResponse(e, responseText, 200);
         }
 
         private void handleGetTaskById(HttpExchange e, String query) throws IOException {
@@ -347,6 +365,7 @@ public class HttpTaskServer {
             }
             sendResponse(e, responseText, statusCode);
         }
+
         private void handlePostSubtask(HttpExchange e) throws IOException {
             int statusCode = 400;
             String responseText;
@@ -376,6 +395,10 @@ public class HttpTaskServer {
                 } else {
                     try {
                         manager.createSubtask(inputSubtask);
+                        Epic epic = manager.getEpicById(epicId);
+                        if (epic != null) {
+                            epic.addSubtask(inputSubtask);
+                        }
                         responseText = "Успешно создана новая подзадача";
                         statusCode = 201;
                     } catch (ManagerInvalidTimePropertiesException | TaskNotFoundException exception) {
@@ -387,6 +410,7 @@ public class HttpTaskServer {
             }
             sendResponse(e, responseText, statusCode);
         }
+
         private void handleDelSubtaskById(HttpExchange e, String query) throws IOException {
             deleteObject(e, query, TaskType.SUBTASK, "Подзадача");
         }
@@ -410,10 +434,7 @@ public class HttpTaskServer {
             sendResponse(e, "Подходящий эндпоинт не найден", 404);
         }
 
-        //пришлось написать кастомный распаковщик json'а из-за того что Gson.fromJson
-        // выкидывал ошибки для эпиков и подзадач
         private Map<String, String> unpackNonTaskJson(String requestBody) {
-            System.out.println(requestBody);
             Map<String, String> fields = new HashMap<>();
             String noBracesBody = requestBody.substring(1, requestBody.length() - 1);
             String[] bodyElems = noBracesBody.split(",");
@@ -482,7 +503,6 @@ public class HttpTaskServer {
             sendResponse(e, responseText, statusCode);
         }
 
-
         private void sendResponse(
                 HttpExchange exchange,
                 String responseText,
@@ -519,7 +539,6 @@ public class HttpTaskServer {
             }
             return queryParams;
         }
-
 
         private Endpoint getEndpoint(String path, String method, String query) {
             Map<String, String> queryParams = getQueryParams(query);
