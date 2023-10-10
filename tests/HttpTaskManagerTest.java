@@ -1,11 +1,11 @@
-import mock.KVTaskClientMock;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import java.io.IOException;
+
 import ru.atlassian.jira.service.TaskManager;
 import ru.atlassian.jira.service.HttpTaskManager;
-
-import java.io.IOException;
+import mock.KVTaskClientMock;
 
 public class HttpTaskManagerTest extends TaskManagerTest {
 

@@ -42,7 +42,6 @@ public class KVTaskClient {
         } else {
             throw new KVClientNoTokenAvailable("Не удалось получить токен");
         }
-
         return requestedToken;
     }
 

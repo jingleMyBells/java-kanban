@@ -53,18 +53,6 @@ public class HttpTaskServer {
         server.start();
     }
 
-//    public HttpTaskServer() throws IOException {
-//        GsonBuilder gsonBuilder = new GsonBuilder();
-//        gsonBuilder.registerTypeAdapter(LocalDateTime.class, new LocalDateAdapter());
-//        gsonBuilder.registerTypeAdapter(Task.class, new TaskSerializer());
-//        gsonBuilder.registerTypeAdapter(Epic.class, new EpicSerializer());
-//        gsonBuilder.registerTypeAdapter(Subtask.class, new SubtaskSerializer());
-//        gson = gsonBuilder.create();
-//        server = HttpServer.create(new InetSocketAddress(PORT), 0);
-//        server.createContext("/tasks", new TasksHandler());
-//        server.start();
-//    }
-
     public static class LocalDateAdapter extends TypeAdapter<LocalDateTime> {
         @Override
         public void write(final JsonWriter jsonWriter, final LocalDateTime localDateTime) throws IOException {

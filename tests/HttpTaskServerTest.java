@@ -1,20 +1,11 @@
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import ru.atlassian.jira.model.Status;
-import ru.atlassian.jira.model.Subtask;
-import ru.atlassian.jira.model.Epic;
-import ru.atlassian.jira.model.Task;
-import ru.atlassian.jira.serializers.EpicSerializer;
-import ru.atlassian.jira.serializers.SubtaskSerializer;
-import ru.atlassian.jira.serializers.TaskSerializer;
-import ru.atlassian.jira.service.*;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -25,7 +16,16 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
+
+import ru.atlassian.jira.model.Status;
+import ru.atlassian.jira.model.Subtask;
+import ru.atlassian.jira.model.Epic;
+import ru.atlassian.jira.model.Task;
+import ru.atlassian.jira.serializers.EpicSerializer;
+import ru.atlassian.jira.serializers.SubtaskSerializer;
+import ru.atlassian.jira.serializers.TaskSerializer;
+import ru.atlassian.jira.service.HttpTaskServer;
+import ru.atlassian.jira.service.Managers;
 
 
 public class HttpTaskServerTest {
@@ -94,16 +94,15 @@ public class HttpTaskServerTest {
         Gson gson = new Gson();
         HttpRequest postRequest = generatePostRequest(gson.toJson(epic), url);
         try {
-            HttpResponse<String> response = client.send(postRequest, HttpResponse.BodyHandlers.ofString());
+            client.send(postRequest, HttpResponse.BodyHandlers.ofString());
         } catch (IOException | InterruptedException exception) {
             System.out.println("Ошибка при отправке запроса");
         }
     }
 
-
     @Test
     @DisplayName("Проверяет создание задачи")
-    void taskCreation() {
+    void shouldReturn201() {
         URI url = URI.create(generalUrl + "/task");
         Task newTask = new Task("Новая задача", "Новое опасание", Status.NEW);
         Gson gson = new Gson();
@@ -124,7 +123,7 @@ public class HttpTaskServerTest {
 
     @Test
     @DisplayName("Проверяет редактирование задачи")
-    void taskUpdate() {
+    void shouldReturn202AndCorrectIdTitleDescrStatus() {
         URI url = URI.create(generalUrl + "/task");
         Task newTask = new Task("Новая задача", "Новое опасание", Status.NEW);
         Task anotherTask = new Task("Другое название", "Другое описание", Status.IN_PROGRESS);
@@ -180,7 +179,7 @@ public class HttpTaskServerTest {
 
     @Test
     @DisplayName("Проверяет получение задачи")
-    void taskGetting() {
+    void shouldReturnCorrectSize() {
         URI url = URI.create(generalUrl + "/task");
         Task newTask = new Task("Новая задача", "Новое опасание", Status.NEW);
         Task anotherTask = new Task("Другое название", "Другое описание", Status.IN_PROGRESS);
@@ -209,7 +208,7 @@ public class HttpTaskServerTest {
 
     @Test
     @DisplayName("Проверяет удаление задачи")
-    void taskDeletion() {
+    void shouldReturn200AfterDeleteAnd404ForDeletedTask() {
         URI url = URI.create(generalUrl + "/task");
         Task newTask = new Task("Новая задача", "Новое опасание", Status.NEW);
         Gson gson = getGsonBuilder();
@@ -248,7 +247,7 @@ public class HttpTaskServerTest {
 
     @Test
     @DisplayName("Проверяет удаление всех задач")
-    void allTasksDeletion() {
+    void shouldReturn200AndEmptyTaskList() {
         URI url = URI.create(generalUrl + "/task");
         Task newTask = new Task("Новая задача", "Новое опасание", Status.NEW);
         Task anotherTask = new Task("Новая задача", "Новое опасание", Status.NEW);
@@ -283,7 +282,7 @@ public class HttpTaskServerTest {
 
     @Test
     @DisplayName("Проверяет создание эпика")
-    void epicCreation() {
+    void shouldReturn201Epic() {
         URI url = URI.create(generalUrl + "/epic");
         Epic newEpic = new Epic("Новый эпик", "Новое описание");
         Gson gson = new Gson();
@@ -304,7 +303,7 @@ public class HttpTaskServerTest {
 
     @Test
     @DisplayName("Проверяет редактирование эпика")
-    void epicUpdate() {
+    void shouldReturn202AndCorrectPropertiesOfEpic() {
         URI url = URI.create(generalUrl + "/epic");
         Epic newEpic = new Epic("Новая задача", "Новое опасание");
         Epic anotherEpic = new Epic("Другое название", "Другое описание");
@@ -353,7 +352,7 @@ public class HttpTaskServerTest {
 
     @Test
     @DisplayName("Проверяет получение эпика")
-    void epicGetting() {
+    void shouldReturnCorrectEpicListSize() {
         URI url = URI.create(generalUrl + "/epic");
         Epic newEpic = new Epic("Новая задача", "Новое опасание");
         Epic anotherEpic = new Epic("Другое название", "Другое описание");
@@ -382,7 +381,7 @@ public class HttpTaskServerTest {
 
     @Test
     @DisplayName("Проверяет удаление эпика")
-    void epicDeletion() {
+    void shouldReturn200OnDeleteAndNotFoundDeletedEpic() {
         URI url = URI.create(generalUrl + "/epic");
         Epic newEpic = new Epic("Новая задача", "Новое опасание");
         Gson gson = getGsonBuilder();
@@ -421,7 +420,7 @@ public class HttpTaskServerTest {
 
     @Test
     @DisplayName("Проверяет удаление всех эпиков")
-    void allepicDeletion() {
+    void shouldReturn200OnDeleteAndEmprtyEpicList() {
         URI url = URI.create(generalUrl + "/epic");
         Epic newEpic = new Epic("Новая задача", "Новое опасание");
         Epic anotherEpic = new Epic("Новая задача", "Новое опасание");
@@ -457,7 +456,7 @@ public class HttpTaskServerTest {
 
     @Test
     @DisplayName("Проверяет создание подзадачи")
-    void subtaskCreation() {
+    void shouldReturn201Subtask() {
         createEpicForSubtaskTests();
         URI url = URI.create(generalUrl + "/subtask");
         Subtask newSubtask = new Subtask("Новый эпик", "Новое описание", 1);
@@ -478,7 +477,7 @@ public class HttpTaskServerTest {
 
     @Test
     @DisplayName("Проверяет редактирование подзадачи")
-    void subtaskUpdate() {
+    void shouldReturn202AndCorrectSuvtaskProperties() {
         createEpicForSubtaskTests();
         URI url = URI.create(generalUrl + "/subtask");
         Subtask newSubtask = new Subtask("Новая задача", "Новое опасание",1);
@@ -528,7 +527,7 @@ public class HttpTaskServerTest {
 
     @Test
     @DisplayName("Проверяет получение подзадачи")
-    void subеtaskGetting() {
+    void souldReturnCorrectSubtaskListSize() {
         createEpicForSubtaskTests();
         URI url = URI.create(generalUrl + "/subtask");
         Subtask newSubtask = new Subtask("Новая задача", "Новое опасание", 1);
@@ -558,7 +557,7 @@ public class HttpTaskServerTest {
 
     @Test
     @DisplayName("Проверяет удаление подзадачи")
-    void subtaskDeletion() {
+    void shoulrdReturn200AfterDeleteAndNotFoundGetSubtask() {
         createEpicForSubtaskTests();
         URI url = URI.create(generalUrl + "/subtask");
         Subtask newSubtask = new Subtask("Новая задача", "Новое опасание", 1);
@@ -598,7 +597,7 @@ public class HttpTaskServerTest {
 
     @Test
     @DisplayName("Проверяет удаление всех подзадач")
-    void allsubTasksDeletion() {
+    void shouldReturn200AfterDeleteAndEmptySubtaskList() {
         createEpicForSubtaskTests();
         URI url = URI.create(generalUrl + "/subtask");
         Subtask newSubtask = new Subtask("Новая задача", "Новое опасание",1);
@@ -634,7 +633,7 @@ public class HttpTaskServerTest {
 
     @Test
     @DisplayName("Проверяет получение всех подзадач эпика")
-    void epicSubtasks() {
+    void shouldReturnOnlyOneCorrectSubtaskIdFromEpicSubtaskList() {
         createEpicForSubtaskTests();
         createEpicForSubtaskTests();
         URI url = URI.create(generalUrl + "/subtask");
@@ -666,11 +665,75 @@ public class HttpTaskServerTest {
 
     @Test
     @DisplayName("Проверяет получение истории")
-    void history() {}
+    void shouldReturnCorrectTaskSizeFromHistoryAndCorrectId() {
+        URI url = URI.create(generalUrl + "/task");
+        URI urlTask1 = URI.create(generalUrl + "/task?id=1");
+        URI urlTask2 = URI.create(generalUrl + "/task?id=2");
+        URI historyUrl = URI.create(generalUrl + "/history");
+        Task newTask = new Task("Новая задача", "Новое опасание",Status.NEW);
+        Task secondTask = new Task("Новая задача", "Новое опасание",Status.NEW);
+        Gson gson = getGsonBuilder();
+        HttpRequest postRequest = generatePostRequest(gson.toJson(newTask), url);
+        HttpRequest post2Request = generatePostRequest(gson.toJson(secondTask), url);
+        HttpRequest getRequest1 = generateGetRequest(urlTask1);
+        HttpRequest getRequest2 = generateGetRequest(urlTask2);
+        HttpRequest getHistoryRequest = generateGetRequest(historyUrl);
+        try {
+            client.send(postRequest, HttpResponse.BodyHandlers.ofString());
+            client.send(post2Request, HttpResponse.BodyHandlers.ofString());
+            client.send(getRequest2, HttpResponse.BodyHandlers.ofString());
+            client.send(getRequest1, HttpResponse.BodyHandlers.ofString());
+
+            HttpResponse<String> getResponse = client.send(getHistoryRequest, HttpResponse.BodyHandlers.ofString());
+            Type taskListType = new TypeToken<List<Task>>() {}.getType();
+            List<Task> tasksFromResponse = gson.fromJson(getResponse.body(), taskListType);
+
+            Assertions.assertEquals(
+                    2,
+                    tasksFromResponse.size(),
+                    "Сервер вернул неожиданное кол-во задач в истории"
+            );
+
+            Assertions.assertEquals(
+                    2,
+                    tasksFromResponse.get(0).getId(),
+                    "Сервер вернул неожиданный идентификатор задачи в истории"
+            );
+
+
+        } catch (IOException | InterruptedException exception) {
+            System.out.println("Ошибка при отправке запроса");
+        }
+    }
 
     @Test
     @DisplayName("Проверяет получение истории")
-    void prioritized() {}
+    void shouldReturnCorrectFirstPrioritizedTaskId() {
+        URI url = URI.create(generalUrl + "/task");
+        URI priorTasksUrl = URI.create(generalUrl);
+        LocalDateTime time1 = LocalDateTime.of(2023, 10, 11, 1, 23);
+        LocalDateTime time2 = LocalDateTime.of(2023, 10, 11, 2, 23);
+        Task newTask = new Task("Новая задача", "Новое опасание",Status.NEW, 5, time1);
+        Task secondTask = new Task("Новая задача", "Новое опасание",Status.NEW, 5, time2);
+        Gson gson = getGsonBuilder();
+        HttpRequest postRequest = generatePostRequest(gson.toJson(newTask), url);
+        HttpRequest post2Request = generatePostRequest(gson.toJson(secondTask), url);
+        HttpRequest getHistoryRequest = generateGetRequest(priorTasksUrl);
+        try {
+            client.send(postRequest, HttpResponse.BodyHandlers.ofString());
+            client.send(post2Request, HttpResponse.BodyHandlers.ofString());
 
+            HttpResponse<String> getResponse = client.send(getHistoryRequest, HttpResponse.BodyHandlers.ofString());
+            Type subtaskListType = new TypeToken<List<Task>>() {}.getType();
+            List<Task> subtasksFromResponse = gson.fromJson(getResponse.body(), subtaskListType);
 
+            Assertions.assertEquals(
+                    1,
+                    subtasksFromResponse.get(0).getId(),
+                    "Сервер вернул неожиданный идентификатор задачи в истории"
+            );
+        } catch (IOException | InterruptedException exception) {
+            System.out.println("Ошибка при отправке запроса");
+        }
+    }
 }

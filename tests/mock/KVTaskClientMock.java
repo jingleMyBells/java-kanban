@@ -1,24 +1,15 @@
 package mock;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
-import ru.atlassian.jira.model.Epic;
-import ru.atlassian.jira.model.Status;
-import ru.atlassian.jira.model.Subtask;
-import ru.atlassian.jira.model.Task;
-import ru.atlassian.jira.service.KVTaskClient;
-import ru.atlassian.jira.exceptions.KVClientNoTokenAvailable;
-import ru.atlassian.jira.exceptions.KVClientWrongStatusCode;
-
 import java.io.IOException;
-import java.net.URI;
 import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import com.google.gson.Gson;
+
+import ru.atlassian.jira.model.Epic;
+import ru.atlassian.jira.model.Status;
+import ru.atlassian.jira.model.Task;
+import ru.atlassian.jira.service.KVTaskClient;
 
 public class KVTaskClientMock extends KVTaskClient {
     private final String generalUrl;
@@ -39,7 +30,7 @@ public class KVTaskClientMock extends KVTaskClient {
     }
 
     @Override
-    protected String getToken() throws IOException, InterruptedException {
+    protected String getToken() {
         return "token";
     }
 
@@ -63,7 +54,7 @@ public class KVTaskClientMock extends KVTaskClient {
 
     private void emulateTasks() {
         int k = 3;
-        for (int i = 1; i <= 3; i++) {
+        for (int i = 1; i <= k; i++) {
             tasks.put(i, new Task(
                     "title" + i,
                     "description" + i,
@@ -74,7 +65,7 @@ public class KVTaskClientMock extends KVTaskClient {
 
     private void emulateEpics() {
         int k = 3;
-        for (int i = 1; i <= 3; i++) {
+        for (int i = 1; i <= k; i++) {
             epics.put(i, new Epic(
                     "title" + i,
                     "description" + i
