@@ -136,7 +136,7 @@ public class Task implements Comparable<Task>{
         } else if (this.getStartTime().isEmpty() && task.getStartTime().isPresent()) {
             return 1;
         } else {
-            return 0;
+            return this.getId() - task.getId();
         }
     }
 }

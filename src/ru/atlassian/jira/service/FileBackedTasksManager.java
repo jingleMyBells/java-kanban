@@ -23,11 +23,13 @@ import java.util.Map;
 import java.util.TreeSet;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
+    protected final String source;
     private final File filename;
 
-    FileBackedTasksManager(String filename) {
-        this.filename = new File(filename);
-        restoreFromFile();
+    FileBackedTasksManager(String src) {
+        this.source = src;
+        this.filename = new File(source);
+        // restoreFromSource();
     }
 
     @Override
@@ -123,7 +125,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         save();
     }
 
-    private void save() throws ManagerSaveException {
+    protected void save() throws ManagerSaveException {
         Map<Integer, Task> allTasks = getAllStoredObjects();
         try (FileWriter writer = new FileWriter(filename, StandardCharsets.UTF_8)) {
             writer.write("id,type,title,status,description,epicId,duration,startTime\n");
@@ -136,7 +138,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         saveHistory();
     }
 
-    private void saveHistory() throws ManagerSaveException {
+    protected void saveHistory() throws ManagerSaveException {
         List<Task> history = this.getHistory();
         if (!history.isEmpty()) {
             List<String> taskIds = new ArrayList<>();
@@ -153,7 +155,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
     }
 
-    private void restoreFromFile() throws ManagerReadException, ManagerEmptyStorageException {
+    public void restoreFromSource() throws ManagerReadException, ManagerEmptyStorageException {
         List<String> tasksToRestore = new ArrayList<>();
 
         if (filename.exists()) {
@@ -219,11 +221,10 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 }
             }
         }
-
         this.prioritizedTasks = new TreeSet<>(getAllStoredTasks());
     }
 
-    private void restoreAutoincrement() {
+    protected void restoreAutoincrement() {
         Map<Integer, Task> allTasks = getAllStoredObjects();
         int maxId = 0;
         for (Map.Entry<Integer, Task> entry : allTasks.entrySet()) {
@@ -233,7 +234,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         this.autoIncrement = maxId;
     }
 
-    private Map<Integer, Task> getAllStoredObjects() {
+    protected Map<Integer, Task> getAllStoredObjects() {
         Map<Integer, Task> allTasks = new HashMap<>();
         allTasks.putAll(this.tasks);
         allTasks.putAll(this.epics);
