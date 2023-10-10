@@ -29,7 +29,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     FileBackedTasksManager(String src) {
         this.source = src;
         this.filename = new File(source);
-        restoreFromSource();
+        // restoreFromSource();
     }
 
     @Override
@@ -155,7 +155,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
     }
 
-    protected void restoreFromSource() throws ManagerReadException, ManagerEmptyStorageException {
+    public void restoreFromSource() throws ManagerReadException, ManagerEmptyStorageException {
         List<String> tasksToRestore = new ArrayList<>();
 
         if (filename.exists()) {

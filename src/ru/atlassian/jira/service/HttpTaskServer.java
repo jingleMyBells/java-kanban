@@ -38,18 +38,10 @@ public class HttpTaskServer {
     private static final Charset UTF8 = StandardCharsets.UTF_8;
     private static Gson gson;
     private final HttpServer server;
-    private static final TaskManager manager;
+    private static TaskManager manager;
 
-    static {
-        try {
-            manager = Managers.getHttp("http://localhost:8078");
-        } catch (IOException | InterruptedException e) {
-            System.out.println("Исключение в менеджере" + e.getMessage());
-            throw new RuntimeException(e);
-        }
-    }
-
-    public HttpTaskServer() throws IOException {
+    public HttpTaskServer(TaskManager manager) throws IOException {
+        HttpTaskServer.manager = manager;
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(LocalDateTime.class, new LocalDateAdapter());
         gsonBuilder.registerTypeAdapter(Task.class, new TaskSerializer());
@@ -61,7 +53,19 @@ public class HttpTaskServer {
         server.start();
     }
 
-    static class LocalDateAdapter extends TypeAdapter<LocalDateTime> {
+//    public HttpTaskServer() throws IOException {
+//        GsonBuilder gsonBuilder = new GsonBuilder();
+//        gsonBuilder.registerTypeAdapter(LocalDateTime.class, new LocalDateAdapter());
+//        gsonBuilder.registerTypeAdapter(Task.class, new TaskSerializer());
+//        gsonBuilder.registerTypeAdapter(Epic.class, new EpicSerializer());
+//        gsonBuilder.registerTypeAdapter(Subtask.class, new SubtaskSerializer());
+//        gson = gsonBuilder.create();
+//        server = HttpServer.create(new InetSocketAddress(PORT), 0);
+//        server.createContext("/tasks", new TasksHandler());
+//        server.start();
+//    }
+
+    public static class LocalDateAdapter extends TypeAdapter<LocalDateTime> {
         @Override
         public void write(final JsonWriter jsonWriter, final LocalDateTime localDateTime) throws IOException {
             jsonWriter.value(localDateTime.format(Task.FORMATTER));
@@ -150,7 +154,7 @@ public class HttpTaskServer {
                         break;
                 }
             } catch (Exception exception) {
-                System.out.println(exception);
+                System.out.println("Ошибка: " + exception.getMessage());
             }
         }
 
@@ -271,7 +275,7 @@ public class HttpTaskServer {
             Map<String, String> inputEpicFields = unpackNonTaskJson(requestBody);
             if ((inputEpicFields.get("title") != null) && (inputEpicFields.get("description") != null)) {
                 Epic inputEpic = new Epic(inputEpicFields.get("title"), inputEpicFields.get("description"));
-                if (inputEpicFields.get("id") != null) {
+                if (!inputEpicFields.get("id").equals("0")) {
                     try {
                         inputEpic.setId(Integer.parseInt(inputEpicFields.get("id")));
                         manager.updateEpic(inputEpic);
@@ -372,18 +376,16 @@ public class HttpTaskServer {
             InputStream inputStream = e.getRequestBody();
             String requestBody = new String(inputStream.readAllBytes(), UTF8);
             Map<String, String> inputSubtaskFields = unpackNonTaskJson(requestBody);
-            if (
-                    (inputSubtaskFields.get("title") != null)
+            if ((inputSubtaskFields.get("title") != null)
                             && (inputSubtaskFields.get("description") != null)
-                            && (inputSubtaskFields.get("epicId") != null)
-            ) {
+                            && (inputSubtaskFields.get("epicId") != null)) {
                 int epicId = Integer.parseInt(inputSubtaskFields.get("epicId"));
                 Subtask inputSubtask = new Subtask(
                         inputSubtaskFields.get("title"),
                         inputSubtaskFields.get("description"),
                         epicId
                 );
-                if (inputSubtaskFields.get("id") != null) {
+                if (!inputSubtaskFields.get("id").equals("0")) {
                     try {
                         inputSubtask.setId(Integer.parseInt(inputSubtaskFields.get("id")));
                         manager.updateSubtask(inputSubtask);
@@ -417,7 +419,7 @@ public class HttpTaskServer {
 
         private void handleDelAllSubtasks(HttpExchange e) throws IOException {
             manager.deleteAllSubtasks();
-            sendResponse(e, "Успешно удалены все подзадачи", 204);
+            sendResponse(e, "Успешно удалены все подзадачи", 200);
         }
 
         private void handleGetHistory(HttpExchange e) throws IOException {
@@ -542,7 +544,6 @@ public class HttpTaskServer {
 
         private Endpoint getEndpoint(String path, String method, String query) {
             Map<String, String> queryParams = getQueryParams(query);
-
             String[] pathElements = path.split("/");
             if ((pathElements.length == 2) && (pathElements[1].equals("tasks"))) {
                 return Endpoint.GET_PRIORITIZED;

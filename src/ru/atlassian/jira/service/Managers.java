@@ -17,7 +17,9 @@ public class Managers {
     }
 
     public static FileBackedTasksManager getFileBacked(String filename) {
-        return new FileBackedTasksManager(filename);
+        FileBackedTasksManager manager = new FileBackedTasksManager(filename);
+        manager.restoreFromSource();
+        return manager;
     }
 
     public static InMemoryTaskManager getInMemory() {
@@ -25,7 +27,9 @@ public class Managers {
     }
 
     public static HttpTaskManager getHttp(String url) throws IOException, InterruptedException {
-            return new HttpTaskManager(url);
+        HttpTaskManager manager = new HttpTaskManager(url);
+        manager.restoreFromSource();
+        return manager;
     }
 
     public static HistoryManager getDefaultHistory() {

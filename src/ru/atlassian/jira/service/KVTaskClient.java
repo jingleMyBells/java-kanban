@@ -23,7 +23,7 @@ public class KVTaskClient {
         this.token = getToken();
     }
 
-    private String getToken() throws IOException, InterruptedException {
+    protected String getToken() throws IOException, InterruptedException {
         URI url = URI.create(generalUrl + "/register");
         HttpRequest.Builder requestBuilder = HttpRequest.newBuilder();
         HttpRequest request = requestBuilder

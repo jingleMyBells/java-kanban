@@ -18,7 +18,12 @@ import ru.atlassian.jira.model.Task;
 public class HttpTaskManager extends FileBackedTasksManager {
     private KVTaskClient kvclient;
 
-    HttpTaskManager(String url) {
+    public HttpTaskManager(String url, KVTaskClient client) {
+        super(url);
+        this.kvclient = client;
+    }
+
+    public HttpTaskManager(String url) {
         super(url);
     }
 
@@ -56,14 +61,14 @@ public class HttpTaskManager extends FileBackedTasksManager {
     }
 
     @Override
-    protected void restoreFromSource() throws ManagerReadException, ManagerEmptyStorageException {
+    public void restoreFromSource() throws ManagerReadException, ManagerEmptyStorageException {
         try {
             loadTasks();
             loadEpics();
             loadSubtasks();
             loadHistory();
         } catch (IOException | InterruptedException e) {
-            System.out.println("восстановление из хранилища бросила исключение " + e.getMessage());
+            System.out.println("восстановление из хранилища бросило исключение " + e.getMessage());
         }
         restoreAutoincrement();
         this.prioritizedTasks = new TreeSet<>(getAllStoredTasks());
