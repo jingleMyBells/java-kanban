@@ -29,7 +29,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     FileBackedTasksManager(String src) {
         this.source = src;
         this.filename = new File(source);
-        // restoreFromSource();
     }
 
     @Override

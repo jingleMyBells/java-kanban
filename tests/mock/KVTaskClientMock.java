@@ -22,18 +22,12 @@ import ru.atlassian.jira.service.HttpTaskServer;
 import ru.atlassian.jira.service.KVTaskClient;
 
 public class KVTaskClientMock extends KVTaskClient {
-    private final String generalUrl;
-    private final String token;
-    private final HttpClient client;
     private Map<Integer, Task> tasks;
     private Map<Integer, Epic> epics;
     private Map<Integer, Epic> subtasks;
 
     public KVTaskClientMock(String url) throws IOException, InterruptedException {
         super(url);
-        this.generalUrl = url;
-        this.client = HttpClient.newHttpClient();
-        this.token = getToken();
         tasks = new HashMap<>();
         epics = new HashMap<>();
     }

@@ -36,20 +36,12 @@ import ru.atlassian.jira.serializers.TaskSerializer;
 public class HttpTaskServer {
     private static final int PORT = 8080;
     private static final Charset UTF8 = StandardCharsets.UTF_8;
-    private static Gson gson;
+    private final static Gson gson = getGsonBuilder();
     private final HttpServer server;
-    private static TaskManager manager;
 
     public HttpTaskServer(TaskManager manager) throws IOException {
-        HttpTaskServer.manager = manager;
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(LocalDateTime.class, new LocalDateAdapter());
-        gsonBuilder.registerTypeAdapter(Task.class, new TaskSerializer());
-        gsonBuilder.registerTypeAdapter(Epic.class, new EpicSerializer());
-        gsonBuilder.registerTypeAdapter(Subtask.class, new SubtaskSerializer());
-        gson = gsonBuilder.create();
         server = HttpServer.create(new InetSocketAddress(PORT), 0);
-        server.createContext("/tasks", new TasksHandler());
+        server.createContext("/tasks", new TasksHandler(manager));
         server.start();
     }
 
@@ -69,7 +61,22 @@ public class HttpTaskServer {
         server.stop(delay);
     }
 
+    private static Gson getGsonBuilder() {
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.registerTypeAdapter(LocalDateTime.class, new HttpTaskServer.LocalDateAdapter());
+        gsonBuilder.registerTypeAdapter(Task.class, new TaskSerializer());
+        gsonBuilder.registerTypeAdapter(Epic.class, new EpicSerializer());
+        gsonBuilder.registerTypeAdapter(Subtask.class, new SubtaskSerializer());
+        return gsonBuilder.create();
+    }
+
     static class TasksHandler implements HttpHandler {
+        private final TaskManager managerFromServer;
+
+        public TasksHandler(TaskManager manager) {
+            this.managerFromServer = manager;
+        }
+
         @Override
         public void handle(HttpExchange exchange) {
             String requestPath = exchange.getRequestURI().getPath();
@@ -147,7 +154,7 @@ public class HttpTaskServer {
         }
 
         private void handleGetAllTasks(HttpExchange e) throws IOException {
-            List<Task> tasks = manager.getAllTasks();
+            List<Task> tasks = managerFromServer.getAllTasks();
             String responseText = gson.toJson(tasks);
             sendResponse(e, responseText, 200);
         }
@@ -165,7 +172,7 @@ public class HttpTaskServer {
                     responseText = "Невалидный идентификатор";
                 }
                 if (id != 0) {
-                    Task task = manager.getTaskById(id);
+                    Task task = managerFromServer.getTaskById(id);
                     if (task == null) {
                         responseText = "Задача с таким идентификатором не найдена";
                         statusCode = 404;
@@ -193,9 +200,9 @@ public class HttpTaskServer {
             }
 
             int taskId = inputTask != null ? inputTask.getId() : 0;
-            if ((taskId != 0) && (manager.getTaskById(taskId) != null)){
+            if ((taskId != 0) && (managerFromServer.getTaskById(taskId) != null)){
                 try {
-                    manager.updateTask(inputTask);
+                    managerFromServer.updateTask(inputTask);
                     responseText = "Успешно обновлена задача " + taskId;
                     statusCode = 202;
                 } catch (ManagerInvalidTimePropertiesException exception) {
@@ -203,7 +210,7 @@ public class HttpTaskServer {
                 }
             } else {
                 try {
-                    manager.createTask(inputTask);
+                    managerFromServer.createTask(inputTask);
                     responseText = "Успешно создана новая задача";
                     statusCode = 201;
                 } catch (ManagerInvalidTimePropertiesException exception) {
@@ -218,12 +225,12 @@ public class HttpTaskServer {
         }
 
         private void handleDelAllTasks(HttpExchange e) throws IOException {
-            manager.deleteAllTasks();
+            managerFromServer.deleteAllTasks();
             sendResponse(e, "Успешно удалены все задачи", 200);
         }
 
         private void handleGetAllEpics(HttpExchange e) throws IOException {
-            List<Epic> epics = manager.getAllEpics();
+            List<Epic> epics = managerFromServer.getAllEpics();
             sendResponse(e, gson.toJson(epics), 200);
         }
 
@@ -240,7 +247,7 @@ public class HttpTaskServer {
                     responseText = "Невалидный идентификатор";
                 }
                 if (id != 0) {
-                    Epic epic = manager.getEpicById(id);
+                    Epic epic = managerFromServer.getEpicById(id);
                     if (epic == null) {
                         responseText = "Эпик с таким идентификатором не найден";
                         statusCode = 404;
@@ -266,7 +273,7 @@ public class HttpTaskServer {
                 if (!inputEpicFields.get("id").equals("0")) {
                     try {
                         inputEpic.setId(Integer.parseInt(inputEpicFields.get("id")));
-                        manager.updateEpic(inputEpic);
+                        managerFromServer.updateEpic(inputEpic);
                         responseText = "Успешно обновлен эпик " + inputEpicFields.get("id");
                         statusCode = 202;
                     } catch (ManagerInvalidTimePropertiesException exception) {
@@ -274,7 +281,7 @@ public class HttpTaskServer {
                     }
                 } else {
                     try {
-                        manager.createEpic(inputEpic);
+                        managerFromServer.createEpic(inputEpic);
                         responseText = "Успешно создан новый эпик";
                         statusCode = 201;
                     } catch (ManagerInvalidTimePropertiesException exception) {
@@ -292,7 +299,7 @@ public class HttpTaskServer {
         }
 
         private void handleDelAllEpics(HttpExchange e) throws IOException {
-            manager.deleteAllEpics();
+            managerFromServer.deleteAllEpics();
             sendResponse(e, "Успешно удалены все эпики", 200);
         }
 
@@ -309,12 +316,12 @@ public class HttpTaskServer {
                     responseText = "Невалидный идентификатор";
                 }
                 if (id != 0) {
-                    Epic epic = manager.getEpicById(id);
+                    Epic epic = managerFromServer.getEpicById(id);
                     if (epic == null) {
                         responseText = "Эпик с таким идентификатором не найден";
                         statusCode = 404;
                     } else {
-                        List<Subtask> subtasks = manager.getAllEpicSubtasks(id);
+                        List<Subtask> subtasks = managerFromServer.getAllEpicSubtasks(id);
                         responseText = gson.toJson(subtasks);
                         statusCode = 200;
                     }
@@ -326,7 +333,7 @@ public class HttpTaskServer {
         }
 
         private void handleGetAllSubtasks(HttpExchange e) throws IOException {
-            List<Subtask> subtasks = manager.getAllSubtasks();
+            List<Subtask> subtasks = managerFromServer.getAllSubtasks();
             sendResponse(e, gson.toJson(subtasks), 200);
         }
 
@@ -343,7 +350,7 @@ public class HttpTaskServer {
                     responseText = "Невалидный идентификатор";
                 }
                 if (id != 0) {
-                    Subtask subtask = manager.getSubtaskById(id);
+                    Subtask subtask = managerFromServer.getSubtaskById(id);
                     if (subtask == null) {
                         responseText = "Подзадача с таким идентификатором не найдена";
                         statusCode = 404;
@@ -376,7 +383,7 @@ public class HttpTaskServer {
                 if (!inputSubtaskFields.get("id").equals("0")) {
                     try {
                         inputSubtask.setId(Integer.parseInt(inputSubtaskFields.get("id")));
-                        manager.updateSubtask(inputSubtask);
+                        managerFromServer.updateSubtask(inputSubtask);
                         responseText = "Успешно обновлена подзадача " + inputSubtaskFields.get("id");
                         statusCode = 202;
                     } catch (ManagerInvalidTimePropertiesException exception) {
@@ -384,8 +391,8 @@ public class HttpTaskServer {
                     }
                 } else {
                     try {
-                        manager.createSubtask(inputSubtask);
-                        Epic epic = manager.getEpicById(epicId);
+                        managerFromServer.createSubtask(inputSubtask);
+                        Epic epic = managerFromServer.getEpicById(epicId);
                         if (epic != null) {
                             epic.addSubtask(inputSubtask);
                         }
@@ -406,17 +413,17 @@ public class HttpTaskServer {
         }
 
         private void handleDelAllSubtasks(HttpExchange e) throws IOException {
-            manager.deleteAllSubtasks();
+            managerFromServer.deleteAllSubtasks();
             sendResponse(e, "Успешно удалены все подзадачи", 200);
         }
 
         private void handleGetHistory(HttpExchange e) throws IOException {
-            List<Task> history = manager.getHistory();
+            List<Task> history = managerFromServer.getHistory();
             sendResponse(e, gson.toJson(history), 200);
         }
 
         private void handleGetPrioritized(HttpExchange e) throws IOException {
-            List<Task> tasks = manager.getPrioritizedTasks();
+            List<Task> tasks = managerFromServer.getPrioritizedTasks();
             sendResponse(e, gson.toJson(tasks), 200);
         }
 
@@ -475,13 +482,13 @@ public class HttpTaskServer {
                 if (id != 0) {
                     switch (type) {
                         case TASK:
-                            manager.deleteTaskById(id);
+                            managerFromServer.deleteTaskById(id);
                             break;
                         case EPIC:
-                            manager.deleteEpicById(id);
+                            managerFromServer.deleteEpicById(id);
                             break;
                         case SUBTASK:
-                            manager.deleteSubtaskById(id);
+                            managerFromServer.deleteSubtaskById(id);
                             break;
                     }
                     responseText = "Успешно удалено: " + name + "; ID: " + id;
