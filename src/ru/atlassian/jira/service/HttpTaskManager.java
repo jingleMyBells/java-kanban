@@ -1,9 +1,11 @@
 package ru.atlassian.jira.service;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.TreeSet;
 import java.util.List;
@@ -14,6 +16,9 @@ import ru.atlassian.jira.exceptions.ManagerSaveException;
 import ru.atlassian.jira.model.Epic;
 import ru.atlassian.jira.model.Subtask;
 import ru.atlassian.jira.model.Task;
+import ru.atlassian.jira.serializers.EpicSerializer;
+import ru.atlassian.jira.serializers.SubtaskSerializer;
+import ru.atlassian.jira.serializers.TaskSerializer;
 
 public class HttpTaskManager extends FileBackedTasksManager {
     private KVTaskClient kvclient;
@@ -29,7 +34,7 @@ public class HttpTaskManager extends FileBackedTasksManager {
 
     @Override
     protected void save() throws ManagerSaveException {
-        Gson gson = new Gson();
+        Gson gson = getGsonBuilder();
         String tasks = gson.toJson(this.tasks);
         String epics = gson.toJson(this.epics);
         String subtasks = gson.toJson(this.subtasks);
@@ -44,6 +49,15 @@ public class HttpTaskManager extends FileBackedTasksManager {
             throw new ManagerSaveException("Возникла ошибка записи в хранилище: " + e.getMessage());
         }
         saveHistory();
+    }
+
+    private Gson getGsonBuilder() {
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.registerTypeAdapter(LocalDateTime.class, new HttpTaskServer.LocalDateAdapter());
+        gsonBuilder.registerTypeAdapter(Task.class, new TaskSerializer());
+        gsonBuilder.registerTypeAdapter(Epic.class, new EpicSerializer());
+        gsonBuilder.registerTypeAdapter(Subtask.class, new SubtaskSerializer());
+        return gsonBuilder.create();
     }
 
     @Override

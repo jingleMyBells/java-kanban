@@ -34,7 +34,7 @@ public class HttpTaskServerTest {
     public String generalUrl = "http://localhost:8080/tasks";
 
     @BeforeEach
-    public void createClient() {
+    public void createClientAndServer() {
         try {
             server = new HttpTaskServer(Managers.getInMemory());
         } catch (IOException exception) {
