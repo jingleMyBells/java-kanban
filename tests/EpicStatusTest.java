@@ -14,7 +14,7 @@ class EpicStatusTest {
 
     @BeforeEach
     public void setupForEach() {
-        taskManager = Managers.getDefault();
+        taskManager = Managers.getInMemory();
         Epic mainEpic = new Epic("Test main epic", "Test description");
         taskManager.createEpic(mainEpic);
         epicToTest = taskManager.getEpicById(1);

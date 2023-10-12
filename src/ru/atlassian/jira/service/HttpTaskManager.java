@@ -1,19 +1,26 @@
 package ru.atlassian.jira.service;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.TreeSet;
 import java.util.List;
 
+import ru.atlassian.jira.constants.Constants;
 import ru.atlassian.jira.exceptions.ManagerEmptyStorageException;
 import ru.atlassian.jira.exceptions.ManagerReadException;
 import ru.atlassian.jira.exceptions.ManagerSaveException;
 import ru.atlassian.jira.model.Epic;
 import ru.atlassian.jira.model.Subtask;
 import ru.atlassian.jira.model.Task;
+import ru.atlassian.jira.serializers.EpicSerializer;
+import ru.atlassian.jira.serializers.SubtaskSerializer;
+import ru.atlassian.jira.serializers.TaskSerializer;
+
 
 public class HttpTaskManager extends FileBackedTasksManager {
     private KVTaskClient kvclient;
@@ -29,7 +36,7 @@ public class HttpTaskManager extends FileBackedTasksManager {
 
     @Override
     protected void save() throws ManagerSaveException {
-        Gson gson = new Gson();
+        Gson gson = getGsonBuilder();
         String tasks = gson.toJson(this.tasks);
         String epics = gson.toJson(this.epics);
         String subtasks = gson.toJson(this.subtasks);
@@ -37,13 +44,22 @@ public class HttpTaskManager extends FileBackedTasksManager {
             if (kvclient == null) {
                 this.kvclient = new KVTaskClient(this.source);
             }
-            kvclient.put(Names.tasks, tasks);
-            kvclient.put(Names.epics, epics);
-            kvclient.put(Names.subtasks, subtasks);
+            kvclient.put(Constants.tasks, tasks);
+            kvclient.put(Constants.epics, epics);
+            kvclient.put(Constants.subtasks, subtasks);
         } catch (IOException | InterruptedException e) {
             throw new ManagerSaveException("Возникла ошибка записи в хранилище: " + e.getMessage());
         }
         saveHistory();
+    }
+
+    private Gson getGsonBuilder() {
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.registerTypeAdapter(LocalDateTime.class, new HttpTaskServer.LocalDateAdapter());
+        gsonBuilder.registerTypeAdapter(Task.class, new TaskSerializer());
+        gsonBuilder.registerTypeAdapter(Epic.class, new EpicSerializer());
+        gsonBuilder.registerTypeAdapter(Subtask.class, new SubtaskSerializer());
+        return gsonBuilder.create();
     }
 
     @Override
@@ -54,7 +70,8 @@ public class HttpTaskManager extends FileBackedTasksManager {
             if (kvclient == null) {
                 this.kvclient = new KVTaskClient(this.source);
             }
-            kvclient.put(Names.history, history);
+//            kvclient.put(Names.history, history);
+            kvclient.put(Constants.history, history);
         } catch (IOException | InterruptedException e) {
             throw new ManagerSaveException("Возникла ошибка записи в хранилище: " + e.getMessage());
         }
@@ -79,7 +96,8 @@ public class HttpTaskManager extends FileBackedTasksManager {
         if (kvclient == null) {
             this.kvclient = new KVTaskClient(this.source);
         }
-        String dataFromSource = kvclient.load(Names.tasks);
+//        String dataFromSource = kvclient.load(Names.tasks);
+        String dataFromSource = kvclient.load(Constants.tasks);
         Type tasksMapType = new TypeToken<Map<Integer, Task>>() {}.getType();
         Map<Integer, Task> tasksFromSource = gson.fromJson(dataFromSource, tasksMapType);
         if ((tasksFromSource != null) && !tasksFromSource.isEmpty()) {
@@ -92,7 +110,8 @@ public class HttpTaskManager extends FileBackedTasksManager {
         if (kvclient == null) {
             this.kvclient = new KVTaskClient(this.source);
         }
-        String dataFromSource = kvclient.load(Names.epics);
+//        String dataFromSource = kvclient.load(Names.epics);
+        String dataFromSource = kvclient.load(Constants.epics);
         Type epicsMapType = new TypeToken<Map<Integer, Epic>>() {}.getType();
         Map<Integer, Epic> epicsFromSource = gson.fromJson(dataFromSource, epicsMapType);
         if ((epicsFromSource != null) && !epicsFromSource.isEmpty()) {
@@ -105,7 +124,8 @@ public class HttpTaskManager extends FileBackedTasksManager {
         if (kvclient == null) {
             this.kvclient = new KVTaskClient(this.source);
         }
-        String dataFromSource = kvclient.load(Names.subtasks);
+//        String dataFromSource = kvclient.load(Names.subtasks);
+        String dataFromSource = kvclient.load(Constants.subtasks);
         Type subtasksMapType = new TypeToken<Map<Integer, Subtask>>() {}.getType();
         Map<Integer, Subtask> subtasksFromSource = gson.fromJson(dataFromSource, subtasksMapType);
         if ((subtasksFromSource != null) && !subtasksFromSource.isEmpty()) {
@@ -122,7 +142,8 @@ public class HttpTaskManager extends FileBackedTasksManager {
         if (kvclient == null) {
             this.kvclient = new KVTaskClient(this.source);
         }
-        String dataFromSource = kvclient.load(Names.history);
+//        String dataFromSource = kvclient.load(Names.history);
+        String dataFromSource = kvclient.load(Constants.history);
         Type taskListType = new TypeToken<List<Task>>() {}.getType();
         List<Task> historyFromSource = gson.fromJson(dataFromSource, taskListType);
         if ((historyFromSource != null) && !historyFromSource.isEmpty()) {
@@ -133,12 +154,5 @@ public class HttpTaskManager extends FileBackedTasksManager {
                 this.historyManager.add(this.subtasks.get(id));
             }
         }
-    }
-
-    static class Names {
-        public static String tasks = "tasks";
-        public static String epics = "epics";
-        public static String subtasks = "subtasks";
-        public static String history = "history";
     }
 }

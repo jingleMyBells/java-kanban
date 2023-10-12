@@ -16,7 +16,7 @@ public abstract class TaskManagerTest {
     public TaskManager taskManager;
 
     public TaskManager getProperManager() {
-        return Managers.getDefault();
+        return Managers.getInMemory();
     }
 
     @BeforeEach
@@ -423,7 +423,7 @@ public abstract class TaskManagerTest {
     public void shouldReturnNullWhenEpicWithIDDoesntExist() {
         Epic epic = new Epic("Test title", "Test descrition");
         taskManager.createEpic(epic);
-        Epic epicGot = taskManager.getEpicById(2);
+        Epic epicGot = taskManager.getEpicById(20);
 
         Assertions.assertNull(
                 epicGot,
@@ -799,6 +799,13 @@ public abstract class TaskManagerTest {
                         Status.NEW,
                         estimatedDuration,
                         estimatedStartTime
+                )
+        );
+        taskManager.createTask(
+                new Task(
+                        "Title",
+                        "Descr",
+                        Status.NEW
                 )
         );
         LocalDateTime estimatedEndTime = LocalDateTime.of(2023, 9, 24, 23, 33);

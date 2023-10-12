@@ -13,7 +13,7 @@ public class InMemoryHistoryManagerTest {
 
     @BeforeEach
     public void setupForEach() {
-        taskManager = Managers.getDefault();
+        taskManager = Managers.getInMemory();
     }
 
     @Test
