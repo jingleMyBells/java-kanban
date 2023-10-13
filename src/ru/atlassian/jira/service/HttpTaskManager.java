@@ -14,6 +14,7 @@ import ru.atlassian.jira.constants.Constants;
 import ru.atlassian.jira.exceptions.ManagerEmptyStorageException;
 import ru.atlassian.jira.exceptions.ManagerReadException;
 import ru.atlassian.jira.exceptions.ManagerSaveException;
+import ru.atlassian.jira.exceptions.MessageException;
 import ru.atlassian.jira.model.Epic;
 import ru.atlassian.jira.model.Subtask;
 import ru.atlassian.jira.model.Task;
@@ -84,7 +85,7 @@ public class HttpTaskManager extends FileBackedTasksManager {
             loadSubtasks();
             loadHistory();
         } catch (IOException | InterruptedException e) {
-            System.out.println("восстановление из хранилища бросило исключение " + e.getMessage());
+            throw new MessageException("Восстановление из хранилища бросило исключение " + e.getMessage());
         }
         restoreAutoincrement();
         this.prioritizedTasks = new TreeSet<>(getAllStoredTasks());

@@ -128,6 +128,7 @@ class FileBackedTasksManagerTest extends TaskManagerTest {
         for (int i = 0; i < 3; i++) {
             taskManager.createTask(new Task("task" + i, "dfh7y3", Status.NEW));
         }
+        taskManager.getTaskById(1);
 
         TaskManager taskManager2 = Managers.getFileBacked("tasks_test.csv");
         taskManager2.createTask(new Task("Newtask", "dfh7y3", Status.NEW));
