@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import ru.atlassian.jira.exceptions.ManagerInvalidTimePropertiesException;
+import ru.atlassian.jira.exceptions.MessageException;
 import ru.atlassian.jira.exceptions.TaskNotFoundException;
 import ru.atlassian.jira.model.Task;
 import ru.atlassian.jira.model.Epic;
@@ -149,7 +150,7 @@ public class HttpTaskServer {
                         break;
                 }
             } catch (Exception exception) {
-                System.out.println("Ошибка: " + exception.getMessage());
+                throw new MessageException("Ошибка: " + exception.getMessage());
             }
         }
 

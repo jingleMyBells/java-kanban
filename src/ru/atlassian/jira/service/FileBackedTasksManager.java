@@ -2,6 +2,7 @@ package ru.atlassian.jira.service;
 
 import ru.atlassian.jira.exceptions.ManagerEmptyStorageException;
 import ru.atlassian.jira.exceptions.ManagerReadException;
+import ru.atlassian.jira.exceptions.MessageException;
 import ru.atlassian.jira.model.Epic;
 import ru.atlassian.jira.model.Status;
 import ru.atlassian.jira.model.Subtask;
@@ -215,7 +216,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                         this.historyManager.add(this.epics.get(Integer.parseInt(id)));
                         this.historyManager.add(this.subtasks.get(Integer.parseInt(id)));
                     } catch (NumberFormatException exception) {
-                        System.out.println("Строки с историей нет в исходном файле");
+                        throw new MessageException("Строки с историей нет в исходном файле");
                     }
                 }
             }

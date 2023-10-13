@@ -14,6 +14,7 @@ import ru.atlassian.jira.constants.Constants;
 import ru.atlassian.jira.exceptions.ManagerEmptyStorageException;
 import ru.atlassian.jira.exceptions.ManagerReadException;
 import ru.atlassian.jira.exceptions.ManagerSaveException;
+import ru.atlassian.jira.exceptions.MessageException;
 import ru.atlassian.jira.model.Epic;
 import ru.atlassian.jira.model.Subtask;
 import ru.atlassian.jira.model.Task;
@@ -84,7 +85,7 @@ public class HttpTaskManager extends FileBackedTasksManager {
             loadSubtasks();
             loadHistory();
         } catch (IOException | InterruptedException e) {
-            System.out.println("восстановление из хранилища бросило исключение " + e.getMessage());
+            throw new MessageException("Восстановление из хранилища бросило исключение " + e.getMessage());
         }
         restoreAutoincrement();
         this.prioritizedTasks = new TreeSet<>(getAllStoredTasks());
@@ -95,7 +96,6 @@ public class HttpTaskManager extends FileBackedTasksManager {
         if (kvclient == null) {
             this.kvclient = new KVTaskClient(this.source);
         }
-//        String dataFromSource = kvclient.load(Names.tasks);
         String dataFromSource = kvclient.load(Constants.tasks);
         Type tasksMapType = new TypeToken<Map<Integer, Task>>() {}.getType();
         Map<Integer, Task> tasksFromSource = gson.fromJson(dataFromSource, tasksMapType);
@@ -109,7 +109,6 @@ public class HttpTaskManager extends FileBackedTasksManager {
         if (kvclient == null) {
             this.kvclient = new KVTaskClient(this.source);
         }
-//        String dataFromSource = kvclient.load(Names.epics);
         String dataFromSource = kvclient.load(Constants.epics);
         Type epicsMapType = new TypeToken<Map<Integer, Epic>>() {}.getType();
         Map<Integer, Epic> epicsFromSource = gson.fromJson(dataFromSource, epicsMapType);
@@ -123,7 +122,6 @@ public class HttpTaskManager extends FileBackedTasksManager {
         if (kvclient == null) {
             this.kvclient = new KVTaskClient(this.source);
         }
-//        String dataFromSource = kvclient.load(Names.subtasks);
         String dataFromSource = kvclient.load(Constants.subtasks);
         Type subtasksMapType = new TypeToken<Map<Integer, Subtask>>() {}.getType();
         Map<Integer, Subtask> subtasksFromSource = gson.fromJson(dataFromSource, subtasksMapType);
@@ -141,7 +139,6 @@ public class HttpTaskManager extends FileBackedTasksManager {
         if (kvclient == null) {
             this.kvclient = new KVTaskClient(this.source);
         }
-//        String dataFromSource = kvclient.load(Names.history);
         String dataFromSource = kvclient.load(Constants.history);
         Type taskListType = new TypeToken<List<Task>>() {}.getType();
         List<Task> historyFromSource = gson.fromJson(dataFromSource, taskListType);

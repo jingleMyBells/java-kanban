@@ -17,6 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import ru.atlassian.jira.exceptions.MessageException;
 import ru.atlassian.jira.model.Status;
 import ru.atlassian.jira.model.Subtask;
 import ru.atlassian.jira.model.Epic;
@@ -96,7 +97,7 @@ public class HttpTaskServerTest {
         try {
             client.send(postRequest, HttpResponse.BodyHandlers.ofString());
         } catch (IOException | InterruptedException exception) {
-            System.out.println("Ошибка при отправке запроса");
+            throw new MessageException("Ошибка при отправке запроса");
         }
     }
 
@@ -117,7 +118,7 @@ public class HttpTaskServerTest {
             );
 
         } catch (IOException | InterruptedException exception) {
-            System.out.println("Ошибка при отправке запроса");
+            throw new MessageException("Ошибка при отправке запроса");
         }
     }
 
@@ -173,7 +174,7 @@ public class HttpTaskServerTest {
             );
 
         } catch (IOException | InterruptedException exception) {
-            System.out.println("Ошибка при отправке запроса");
+            throw new MessageException("Ошибка при отправке запроса");
         }
     }
 
@@ -202,7 +203,7 @@ public class HttpTaskServerTest {
             );
 
         } catch (IOException | InterruptedException exception) {
-            System.out.println("Ошибка при отправке запроса");
+            throw new MessageException("Ошибка при отправке запроса");
         }
     }
 
@@ -241,7 +242,7 @@ public class HttpTaskServerTest {
             );
 
         } catch (IOException | InterruptedException exception) {
-            System.out.println("Ошибка при отправке запроса");
+            throw new MessageException("Ошибка при отправке запроса");
         }
     }
 
@@ -276,7 +277,7 @@ public class HttpTaskServerTest {
             );
 
         } catch (IOException | InterruptedException exception) {
-            System.out.println("Ошибка при отправке запроса");
+            throw new MessageException("Ошибка при отправке запроса");
         }
     }
 
@@ -297,7 +298,7 @@ public class HttpTaskServerTest {
             );
 
         } catch (IOException | InterruptedException exception) {
-            System.out.println("Ошибка при отправке запроса");
+            throw new MessageException("Ошибка при отправке запроса");
         }
     }
 
@@ -346,7 +347,7 @@ public class HttpTaskServerTest {
                     "Сервер вернул эпик с неожиданным описанием"
             );
         } catch (IOException | InterruptedException exception) {
-            System.out.println("Ошибка при отправке запроса");
+            throw new MessageException("Ошибка при отправке запроса");
         }
     }
 
@@ -375,7 +376,7 @@ public class HttpTaskServerTest {
             );
 
         } catch (IOException | InterruptedException exception) {
-            System.out.println("Ошибка при отправке запроса");
+            throw new MessageException("Ошибка при отправке запроса");
         }
     }
 
@@ -414,7 +415,7 @@ public class HttpTaskServerTest {
             );
 
         } catch (IOException | InterruptedException exception) {
-            System.out.println("Ошибка при отправке запроса");
+            throw new MessageException("Ошибка при отправке запроса");
         }
     }
 
@@ -449,7 +450,7 @@ public class HttpTaskServerTest {
             );
 
         } catch (IOException | InterruptedException exception) {
-            System.out.println("Ошибка при отправке запроса");
+            throw new MessageException("Ошибка при отправке запроса");
         }
     }
 
@@ -471,7 +472,7 @@ public class HttpTaskServerTest {
                     "При создании подзадачи сервер вернул неожиданный статус"
             );
         } catch (IOException | InterruptedException exception) {
-            System.out.println("Ошибка при отправке запроса");
+            throw new MessageException("Ошибка при отправке запроса");
         }
     }
 
@@ -521,7 +522,7 @@ public class HttpTaskServerTest {
                     "Сервер вернул подзадачу с неожиданным описанием"
             );
         } catch (IOException | InterruptedException exception) {
-            System.out.println("Ошибка при отправке запроса");
+            throw new MessageException("Ошибка при отправке запроса");
         }
     }
 
@@ -551,7 +552,7 @@ public class HttpTaskServerTest {
             );
 
         } catch (IOException | InterruptedException exception) {
-            System.out.println("Ошибка при отправке запроса");
+            throw new MessageException("Ошибка при отправке запроса");
         }
     }
 
@@ -591,7 +592,7 @@ public class HttpTaskServerTest {
             );
 
         } catch (IOException | InterruptedException exception) {
-            System.out.println("Ошибка при отправке запроса");
+            throw new MessageException("Ошибка при отправке запроса");
         }
     }
 
@@ -627,7 +628,7 @@ public class HttpTaskServerTest {
             );
 
         } catch (IOException | InterruptedException exception) {
-            System.out.println("Ошибка при отправке запроса");
+            throw new MessageException("Ошибка при отправке запроса");
         }
     }
 
@@ -659,7 +660,7 @@ public class HttpTaskServerTest {
             );
 
         } catch (IOException | InterruptedException exception) {
-            System.out.println("Ошибка при отправке запроса");
+            throw new MessageException("Ошибка при отправке запроса");
         }
     }
 
@@ -702,7 +703,7 @@ public class HttpTaskServerTest {
 
 
         } catch (IOException | InterruptedException exception) {
-            System.out.println("Ошибка при отправке запроса");
+            throw new MessageException("Ошибка при отправке запроса");
         }
     }
 
@@ -733,7 +734,7 @@ public class HttpTaskServerTest {
                     "Сервер вернул неожиданный идентификатор задачи в истории"
             );
         } catch (IOException | InterruptedException exception) {
-            System.out.println("Ошибка при отправке запроса");
+            throw new MessageException("Ошибка при отправке запроса");
         }
     }
 }
