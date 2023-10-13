@@ -64,13 +64,12 @@ public class HttpTaskManager extends FileBackedTasksManager {
 
     @Override
     protected void saveHistory() throws ManagerSaveException {
-        Gson gson = new Gson();
+        Gson gson = getGsonBuilder();
         String history = gson.toJson(getHistory());
         try {
             if (kvclient == null) {
                 this.kvclient = new KVTaskClient(this.source);
             }
-//            kvclient.put(Names.history, history);
             kvclient.put(Constants.history, history);
         } catch (IOException | InterruptedException e) {
             throw new ManagerSaveException("Возникла ошибка записи в хранилище: " + e.getMessage());
